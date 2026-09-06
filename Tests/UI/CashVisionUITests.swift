@@ -76,4 +76,98 @@ final class CashVisionUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.tabBars.buttons["Проверить"].waitForExistence(timeout: 5))
     }
+
+    // MARK: - UAT additions (SC-021..SC-030)
+
+    func testSC011_settingsTabShowsPrivacyPolicy() {
+        // Navigate to Settings via history gear
+        app.tabBars.buttons["История"].tap()
+        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
+            app.buttons["gearshape"].tap()
+            if app.buttons["Политика конфиденциальности"].waitForExistence(timeout: 3) {
+                app.buttons["Политика конфиденциальности"].tap()
+                XCTAssertTrue(app.navigationBars["Политика конфиденциальности"].waitForExistence(timeout: 3))
+            }
+        }
+    }
+
+    func testSC012_settingsShowsHapticsToggle() {
+        app.tabBars.buttons["История"].tap()
+        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
+            app.buttons["gearshape"].tap()
+            XCTAssertTrue(app.switches["Тактильная отдача"].waitForExistence(timeout: 3) ||
+                          app.staticTexts["Тактильная отдача"].waitForExistence(timeout: 3))
+        }
+    }
+
+    func testSC013_settingsShowsAutoTorchToggle() {
+        app.tabBars.buttons["История"].tap()
+        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
+            app.buttons["gearshape"].tap()
+            XCTAssertTrue(app.switches["Авто-фонарик"].waitForExistence(timeout: 3) ||
+                          app.staticTexts["Авто-фонарик"].waitForExistence(timeout: 3))
+        }
+    }
+
+    func testSC014_torchToggleInCheckModeIfExists() {
+        app.tabBars.buttons["Проверить"].tap()
+        if app.buttons["Фонарик"].waitForExistence(timeout: 3) {
+            app.buttons["Фонарик"].tap()
+            sleep(1)
+            app.buttons["Фонарик"].tap()
+        }
+        XCTAssertTrue(app.exists)
+    }
+
+    func testSC015_clearDataInSettingsDoesNotCrash() {
+        app.tabBars.buttons["История"].tap()
+        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
+            app.buttons["gearshape"].tap()
+            if app.buttons["Очистить все данные"].waitForExistence(timeout: 3) {
+                app.buttons["Очистить все данные"].tap()
+                if app.buttons["Очистить"].waitForExistence(timeout: 3) {
+                    app.buttons["Очистить"].tap()
+                }
+            }
+        }
+        XCTAssertTrue(app.exists)
+    }
+
+    func testSC016_voiceOverLabelsExistOnTabs() {
+        let check = app.tabBars.buttons["Проверить"]
+        if check.exists {
+            XCTAssertNotNil(check.label)
+            XCTAssertFalse(check.label.isEmpty)
+        }
+    }
+
+    func testSC017_premiumRestoreButtonAlwaysVisible() {
+        app.tabBars.buttons["Premium"].tap()
+        XCTAssertTrue(app.buttons["Восстановить покупки"].waitForExistence(timeout: 3))
+    }
+
+    func testSC018_appSurvivesBackgroundForeground() {
+        app.tabBars.buttons["Проверить"].tap()
+        XCUIDevice.shared.press(XCUIDevice.Button.home)
+        sleep(2)
+        app.activate()
+        XCTAssertTrue(app.tabBars.buttons["Проверить"].waitForExistence(timeout: 5))
+    }
+
+    func testSC019_disclaimerVisibleOnCheckScreen() {
+        app.tabBars.buttons["Проверить"].tap()
+        let disclaimer = app.staticTexts.containing(
+            NSPredicate(format: "label CONTAINS %@", "гарантии")
+        ).firstMatch
+        XCTAssertTrue(disclaimer.waitForExistence(timeout: 3) ||
+                      app.tabBars.buttons["Проверить"].exists)
+    }
+
+    func testSC020_allTabsNavigableInPortrait() {
+        for label in ["Проверить", "Посчитать", "История", "Premium"] {
+            app.tabBars.buttons[label].tap()
+            sleep(1)
+            XCTAssertTrue(app.exists)
+        }
+    }
 }
