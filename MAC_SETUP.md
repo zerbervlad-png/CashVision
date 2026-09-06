@@ -204,12 +204,16 @@ git pull origin develop
 # Клонировать и запустить
 git clone https://github.com/zerbervlad-png/CashVision.git
 cd CashVision
-chmod +x run-mac.sh
-./run-mac.sh
+chmod +x setup-mac.sh
+./setup-mac.sh
 
-# Обновить после изменений
+# Обновить после изменений (я делаю push → ты делаешь pull)
 git pull origin main
-./scripts/dev.sh
+# post-merge hook автоматически перегенерирует .xcodeproj
+# В Xcode: Cmd+R для пересборки
+
+# Или одной командой из любого места:
+cv-sync
 
 # Запустить тесты
 ./scripts/test.sh
@@ -217,3 +221,52 @@ git pull origin main
 # Открыть в Xcode
 open CashVision.xcodeproj
 ```
+
+---
+
+## Авто-синхронизация с GitHub (AI workflow)
+
+После `setup-mac.sh` Git hooks уже установлены. Дополнительно:
+
+### Вариант 1: Фоновый авто-pull (пока ты тестируешь UI)
+```bash
+./scripts/watch-git.sh
+```
+Скрипт каждые 30 секунд проверяет GitHub на новые коммиты. Если я делаю push:
+1. Автоматически делает `git pull`
+2. Перегенерирует `.xcodeproj`
+3. Выводит уведомление в Terminal
+4. Ты нажимаешь **Cmd+R** в Xcode → пересборка с актуальным кодом
+
+### Вариант 2: Ручной pull по необходимости
+```bash
+git pull origin main
+# Hook автоматически перегенерирует проект
+# Cmd+R в Xcode
+```
+
+### Вариант 3: Запуск с авто-pull + Xcode + Simulator
+```bash
+./sync-and-run.sh
+```
+Делает всё за один запуск:
+1. `git pull` из нужной ветки
+2. Перегенерация `.xcodeproj`
+3. Сборка + запуск в Simulator
+4. Открытие Xcode для редактирования
+
+С watch-режимом:
+```bash
+./sync-and-run.sh --watch
+```
+
+### Полный workflow для итеративной разработки
+1. На Mac: `./sync-and-run.sh` (один раз)
+2. Xcode открывается с проектом
+3. Simulator запускается с приложением
+4. Ты тестируешь UI, сообщаешь мне о проблемах
+5. Я вношу правки и делаю `git push origin main`
+6. На Mac срабатывает авто-pull (если запущен `watch-git.sh`)
+7. В Terminal появляется уведомление о новых изменениях
+8. В Xcode: **Cmd+R** → пересборка с актуальным кодом
+9. Повторять с шага 4

@@ -193,6 +193,13 @@ if [[ ! -f "CashVision.xcodeproj/project.pbxproj" ]]; then
 fi
 log "Проект сгенерирован: CashVision.xcodeproj"
 
+# ─── 8.1. Установка Git hooks (авто-pull + авто-регенерация) ─────────────────
+log "Устанавливаю Git hooks для авто-синхронизации…"
+if [[ -f "$PROJECT_DIR/install-hooks.sh" ]]; then
+    chmod +x "$PROJECT_DIR/install-hooks.sh"
+    bash "$PROJECT_DIR/install-hooks.sh" 2>&1 | tail -10
+fi
+
 # ─── 9. Создание Simulator если нет ───────────────────────────────────────────
 log "Проверяю iPhone Simulator…"
 SIM_ID="$(xcrun simctl list devices available | grep -E 'iPhone (15|14|SE)' | head -n1 | grep -oE '[A-F0-9-]{36}' || true)"
