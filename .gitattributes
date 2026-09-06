@@ -1,0 +1,18 @@
+# Force LF line endings for shell scripts and text files
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+Makefile text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+*.swift text eol=lf
+*.json text eol=lf
+*.plist text eol=lf
+*.xml text eol=lf
+*.sql text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+*.conf text eol=lf
+*.env* text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
