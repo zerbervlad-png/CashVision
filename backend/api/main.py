@@ -3,7 +3,7 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
@@ -35,8 +35,8 @@ app = FastAPI(
     title=settings.app_name,
     version="1.0.0",
     lifespan=lifespan,
-    openapi_url="/api/v1/openapi.json",
-    docs_url="/api/v1/docs",
+    openapi_url="/api/v1/openapi.json" if not settings.is_production else None,
+    docs_url="/api/v1/docs" if not settings.is_production else None,
 )
 
 app.state.limiter = limiter
@@ -45,14 +45,14 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
 )
 
 
 @app.middleware("http")
-async def add_request_context(request: Request, call_next):
+async def add_security_headers(request: Request, call_next):
     request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     request.state.request_id = request_id
     start = time.perf_counter()
@@ -66,6 +66,10 @@ async def add_request_context(request: Request, call_next):
         )
     duration = time.perf_counter() - start
     response.headers["X-Request-ID"] = request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Cache-Control"] = "no-store"
     REQUEST_COUNT.labels(method=request.method, path=request.url.path, status=response.status_code).inc()
     REQUEST_LATENCY.labels(path=request.url.path).observe(duration)
     return response
@@ -80,7 +84,11 @@ async def health() -> dict:
 
 
 @app.get("/metrics", tags=["metrics"], include_in_schema=False)
-async def metrics():
+async def metrics(request: Request):
+    if settings.is_production:
+        auth = request.headers.get("Authorization", "")
+        if auth != f"Bearer {settings.metrics_token}":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
     from fastapi.responses import Response
 
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)

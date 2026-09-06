@@ -37,14 +37,6 @@
     <array>
         <dict>
             <key>NSPrivacyAccessedAPIType</key>
-            <string>NSPrivacyAccessedAPICamera</string>
-            <key>NSPrivacyAccessedAPITypeReasons</key>
-            <array>
-                <string>CV4CN2.1</string>
-            </array>
-        </dict>
-        <dict>
-            <key>NSPrivacyAccessedAPIType</key>
             <string>NSPrivacyAccessedAPIFileTimestamp</string>
             <key>NSPrivacyAccessedAPITypeReasons</key>
             <array>

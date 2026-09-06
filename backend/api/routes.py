@@ -1,13 +1,16 @@
 from datetime import UTC, datetime
+import re
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from .config import settings
 from .data import BANKNOTES_DATASET, MODEL_VERSION
 
 router = APIRouter()
 api_router = router
+
+SERIAL_PATTERN = re.compile(r"^[А-Яа-яA-Za-z0-9 \-]{1,32}$")
 
 
 class HealthResponse(BaseModel):
@@ -57,7 +60,15 @@ class BanknoteResponse(BaseModel):
 
 
 class SerialVerificationRequest(BaseModel):
-    serial: str = Field(min_length=1, max_length=64)
+    serial: str = Field(min_length=1, max_length=32)
+
+    @field_validator("serial")
+    @classmethod
+    def validate_serial(cls, v: str) -> str:
+        v = v.strip()
+        if not SERIAL_PATTERN.match(v):
+            raise ValueError("invalid_serial_format")
+        return v
 
 
 class SerialVerificationResponse(BaseModel):
