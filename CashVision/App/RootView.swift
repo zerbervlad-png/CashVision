@@ -16,12 +16,17 @@ struct RootView: View {
             if showOnboarding {
                 OnboardingFlow {
                     container.settings.onboardingCompleted = true
-                    showOnboarding = false
+                    withAnimation(.cashSpring) {
+                        showOnboarding = false
+                    }
                 }
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
             } else {
                 MainTabView(container: container, selectedTab: $selectedTab)
+                    .transition(.opacity)
             }
         }
+        .animation(.cashSpring, value: showOnboarding)
     }
 }
 
@@ -35,21 +40,26 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            CheckView(container: container)
-                .tabItem { Label("Проверить", systemImage: "viewfinder") }
-                .tag(AppTab.check)
+            Tab("Проверить", systemImage: "viewfinder", value: AppTab.check) {
+                CheckView(container: container)
+            }
 
-            CountView(container: container)
-                .tabItem { Label("Посчитать", systemImage: "plus.app") }
-                .tag(AppTab.count)
+            Tab("Посчитать", systemImage: "plus.app", value: AppTab.count) {
+                CountView(container: container)
+            }
 
-            HistoryView(viewModel: container.history)
-                .tabItem { Label("История", systemImage: "clock.arrow.circlepath") }
-                .tag(AppTab.history)
+            Tab("История", systemImage: "clock.arrow.circlepath", value: AppTab.history) {
+                HistoryView(viewModel: container.history)
+            }
 
-            PremiumView(manager: container.subscription)
-                .tabItem { Label("Premium", systemImage: "crown") }
-                .tag(AppTab.premium)
+            Tab("Premium", systemImage: "crown", value: AppTab.premium) {
+                PremiumView(manager: container.subscription)
+            }
+        }
+        .onChange(of: selectedTab) { _, newValue in
+            container.settings.lastUsedMode = newValue == .check ? "check" : newValue == .count ? "count" : "other"
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
         }
     }
 }

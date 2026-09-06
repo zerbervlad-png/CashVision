@@ -51,20 +51,26 @@ struct BanknoteMarkerView: View {
             height: proxy.size.height * rect.height
         )
         ZStack {
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 14)
                 .stroke(Color.accentColor, lineWidth: 3)
                 .frame(width: frame.width, height: frame.height)
                 .position(x: frame.midX, y: frame.midY)
+                .shadow(color: .accentColor.opacity(0.4), radius: 8)
 
             VStack(spacing: 6) {
                 Text(banknote.denomination.formatted)
                     .font(.headline)
-                    .padding(.horizontal, 10).padding(.vertical, 4)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
                     .background(.ultraThinMaterial, in: Capsule())
                 if let definition = banknote.definition {
                     ForEach(definition.securityFeatures) { feature in
                         FeaturePin(feature: feature, parentFrame: frame)
-                            .onTapGesture { onTap(feature) }
+                            .onTapGesture {
+                                let impact = UIImpactFeedbackGenerator(style: .medium)
+                                impact.impactOccurred()
+                                onTap(feature)
+                            }
                     }
                 }
             }
@@ -79,15 +85,18 @@ struct FeaturePin: View {
 
     var body: some View {
         Circle()
-            .fill(Color.accentColor.opacity(0.8))
-            .frame(width: 14, height: 14)
+            .fill(Color.accentColor.opacity(0.85))
+            .frame(width: 16, height: 16)
             .overlay(
-                Circle().stroke(.white, lineWidth: 2)
+                Circle()
+                    .stroke(.white, lineWidth: 2.5)
             )
+            .shadow(color: .accentColor.opacity(0.5), radius: 4)
             .position(
                 x: parentFrame.width * feature.position.x,
                 y: parentFrame.height * feature.position.y
             )
             .accessibilityLabel(feature.title)
+            .accessibilityAddTraits(.isButton)
     }
 }

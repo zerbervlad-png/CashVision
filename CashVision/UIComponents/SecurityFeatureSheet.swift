@@ -8,12 +8,14 @@ struct SecurityFeatureSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
+                VStack(alignment: .leading, spacing: 20) {
+                    HStack(spacing: 14) {
                         Image(systemName: icon)
                             .font(.largeTitle)
                             .foregroundStyle(.accent)
-                        VStack(alignment: .leading) {
+                            .frame(width: 48, height: 48)
+                            .background(.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                        VStack(alignment: .leading, spacing: 2) {
                             Text(feature.title)
                                 .font(.title3.bold())
                             Text(denomination.formatted)
@@ -26,14 +28,18 @@ struct SecurityFeatureSheet: View {
                     Text(feature.shortDescription)
                         .font(.body)
 
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text("Как проверить")
                             .font(.headline)
-                        ForEach(Array(feature.instructions.enumerated()), id: \.offset) { _, instruction in
-                            HStack(alignment: .top) {
-                                Image(systemName: "checkmark.circle")
-                                    .foregroundStyle(.green)
+                        ForEach(Array(feature.instructions.enumerated()), id: \.offset) { idx, instruction in
+                            HStack(alignment: .top, spacing: 10) {
+                                Text("\(idx + 1)")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(.white)
+                                    .frame(width: 22, height: 22)
+                                    .background(.accent, in: Circle())
                                 Text(instruction)
+                                    .font(.subheadline)
                             }
                         }
                     }
@@ -42,7 +48,8 @@ struct SecurityFeatureSheet: View {
                         ForEach(feature.checkMethods, id: \.self) { method in
                             Text(methodText(method))
                                 .font(.caption)
-                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
                                 .background(.quaternary, in: Capsule())
                         }
                     }
@@ -56,10 +63,10 @@ struct SecurityFeatureSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Готово") { dismiss() }
+                        .bold()
                 }
             }
         }
-        .presentationDetents([.medium, .large])
     }
 
     private var icon: String {

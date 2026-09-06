@@ -9,24 +9,23 @@ struct HistoryView: View {
         NavigationStack {
             Group {
                 if viewModel.entries.isEmpty {
-                    ContentUnavailableView(
-                        "История пуста",
-                        systemImage: "clock.arrow.circlepath",
-                        description: Text("Здесь появятся результаты пересчёта и проверки банкнот")
-                    )
+                    ContentUnavailableView {
+                        Label("История пуста", systemImage: "clock.arrow.circlepath")
+                    } description: {
+                        Text("Здесь появятся результаты пересчёта и проверки банкнот")
+                    }
                 } else {
                     List {
                         ForEach(viewModel.entries) { entry in
                             HistoryRowView(entry: entry)
-                                .swipeActions {
-                                    Button(role: .destructive) {
-                                        viewModel.remove(entry)
-                                    } label: {
-                                        Label("Удалить", systemImage: "trash")
-                                    }
-                                }
+                                .listRowSeparator(.hidden)
+                                .listRowBackground(
+                                    Color.clear
+                                )
                         }
                     }
+                    .listStyle(.plain)
+                    .contentMargins(.top, 8)
                 }
             }
             .navigationTitle("История")
@@ -40,7 +39,7 @@ struct HistoryView: View {
                 }
                 if !viewModel.entries.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Очистить") {
+                        Button("Очистить", role: .destructive) {
                             showClearConfirmation = true
                         }
                     }
@@ -49,7 +48,9 @@ struct HistoryView: View {
             .confirmationDialog("Очистить всю историю?", isPresented: $showClearConfirmation) {
                 Button("Отмена", role: .cancel) {}
                 Button("Очистить", role: .destructive) {
-                    viewModel.clearAll()
+                    withAnimation(.cashSpring) {
+                        viewModel.clearAll()
+                    }
                 }
             }
         }
@@ -60,43 +61,64 @@ struct HistoryRowView: View {
     let entry: HistoryEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(dateFormatter.string(from: entry.date))
-                    .font(.subheadline.bold())
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(dateFormatter.string(from: entry.date))
+                        .font(.subheadline.bold())
+                    Text(timeFormatter.string(from: entry.date))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 Spacer()
                 Text(amountFormatter.string(from: NSNumber(value: entry.totalAmount)) ?? "\(entry.totalAmount) ₽")
                     .font(.headline)
                     .foregroundStyle(.accent)
             }
+
             HStack {
-                Text(timeFormatter.string(from: entry.date))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(entry.mode == "count" ? "Пересчёт" : "Проверка")
+                    .font(.caption2)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(.quaternary, in: Capsule())
                 Spacer()
-                Text("Режим: \(entry.mode == "count" ? "Пересчёт" : "Проверка")")
+                Text("\(entry.totalCount) купюр")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            ForEach(entry.denominations) { denom in
-                Text(denom.formatted)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+
+            if !entry.denominations.isEmpty {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(entry.denominations) { denom in
+                        HStack {
+                            Text(denom.formatted)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .padding(.top, 2)
             }
         }
+        .padding(14)
+        .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal)
         .padding(.vertical, 4)
     }
 
     private var dateFormatter: DateFormatter {
         let f = DateFormatter()
-        f.dateStyle = .short
+        f.dateStyle = .medium
         f.timeStyle = .none
+        f.locale = Locale(identifier: "ru_RU")
         return f
     }
     private var timeFormatter: DateFormatter {
         let f = DateFormatter()
         f.dateStyle = .none
         f.timeStyle = .short
+        f.locale = Locale(identifier: "ru_RU")
         return f
     }
     private var amountFormatter: NumberFormatter {

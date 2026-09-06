@@ -13,6 +13,7 @@ struct CashVisionApp: App {
     var body: some Scene {
         WindowGroup {
             RootView(container: appContainer)
+                .tint(.accentColor)
                 .preferredColorScheme(nil)
                 .environment(appContainer.subscription)
                 .environment(appContainer.history)

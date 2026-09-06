@@ -24,30 +24,45 @@ struct OnboardingFlow: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Spacer()
+            HStack {
+                Spacer()
+                Button("Пропустить") {
+                    onFinish()
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
+
             TabView(selection: $page) {
                 ForEach(Array(pages.enumerated()), id: \.offset) { idx, page in
                     OnboardingPageView(page: page).tag(idx)
                 }
             }
-            .tabViewStyle(.page)
+            .tabViewStyle(.page(indexDisplayMode: .always))
             .indexViewStyle(.page(backgroundDisplayMode: .always))
 
             VStack(spacing: 12) {
-                Button(page == pages.count - 1 ? "Начать" : "Далее") {
+                Button {
                     if page == pages.count - 1 {
                         onFinish()
                     } else {
-                        withAnimation { page += 1 }
+                        withAnimation(.cashBouncy) {
+                            page += 1
+                        }
                     }
+                } label: {
+                    Text(page == pages.count - 1 ? "Начать" : "Далее")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
                 }
-                .buttonStyle(PrimaryButtonStyle())
-
-                Button("Пропустить") { onFinish() }
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .padding(.horizontal, 24)
+                .animation(.cashSpring, value: page)
             }
-            .padding(.horizontal, 24)
             .padding(.bottom, 32)
         }
     }
@@ -64,17 +79,21 @@ struct OnboardingPageView: View {
     let page: OnboardingPage
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             Image(systemName: page.icon)
-                .font(.system(size: 80))
+                .font(.system(size: 72, weight: .light))
                 .foregroundStyle(.accent)
-            Text(page.title)
-                .font(.title.bold())
-                .multilineTextAlignment(.center)
-            Text(page.subtitle)
-                .font(.body)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .symbolEffect(.pulse, options: .repeating)
+
+            VStack(spacing: 10) {
+                Text(page.title)
+                    .font(.title.bold())
+                    .multilineTextAlignment(.center)
+                Text(page.subtitle)
+                    .font(.body)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(.horizontal, 32)
     }

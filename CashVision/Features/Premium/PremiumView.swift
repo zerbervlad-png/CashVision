@@ -19,45 +19,58 @@ struct PremiumView: View {
             }
             .navigationTitle("Premium")
             .navigationBarTitleDisplayMode(.large)
+            .scrollEdgeEffectStyle(.hard, for: .top)
         }
         .task { await manager.loadProducts() }
-        .onAppear { manager.status == .free ? () : () }
     }
 
     private var headerSection: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 12) {
             Image(systemName: "crown.fill")
-                .font(.system(size: 48))
+                .font(.system(size: 52, weight: .light))
                 .foregroundStyle(.yellow)
-            Text("CashVision Premium")
-                .font(.title2.bold())
-            Text("Расширенные возможности для проверки и пересчёта банкнот")
-                .font(.subheadline)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.secondary)
+                .symbolEffect(.pulse, options: .repeating)
+
+            VStack(spacing: 6) {
+                Text("CashVision Premium")
+                    .font(.title2.bold())
+                Text("Расширенные возможности\nдля проверки и пересчёта банкнот")
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+            }
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
     }
 
     private var featuresSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             FeatureRow(icon: "infinity", title: "Безлимитная проверка", subtitle: "Сколько угодно сканирований в день")
             FeatureRow(icon: "list.bullet.rectangle", title: "Расширенный пересчёт", subtitle: "Дополнительные валюты и опции")
             FeatureRow(icon: "clock.arrow.circlepath", title: "История операций", subtitle: "Сохранение и экспорт результатов")
-            FeatureRow(icon: "checkmark.shield", title: "Расширенная проверка признаков", subtitle: "Дополнительные защитные элементы")
+            FeatureRow(icon: "checkmark.shield", title: "Расширенная проверка", subtitle: "Дополнительные защитные элементы")
         }
-        .padding()
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 16))
+        .padding(18)
+        .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 18))
     }
 
     private var plansSection: some View {
         VStack(spacing: 12) {
             if manager.products.isEmpty {
-                ProgressView()
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .controlSize(.large)
+                    Text("Загрузка тарифов…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
             } else {
                 ForEach(manager.products, id: \.id) { product in
-                    PlanCard(product: product, isPurchasing: false) {
+                    PlanCard(product: product) {
                         Task {
-                            manager.analytics_trackPurchase()
                             await manager.purchase(product)
                         }
                     }
@@ -67,10 +80,16 @@ struct PremiumView: View {
     }
 
     private var restoreSection: some View {
-        Button("Восстановить покупки") {
-            Task { await manager.restorePurchases() }
+        VStack(spacing: 8) {
+            Button {
+                Task { await manager.restorePurchases() }
+            } label: {
+                Label("Восстановить покупки", systemImage: "arrow.clockwise")
+                    .font(.subheadline)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
         }
-        .font(.subheadline)
     }
 
     private var disclaimerSection: some View {
@@ -78,10 +97,11 @@ struct PremiumView: View {
             Text(statusDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            Link("Политика конфиденциальности", destination: URL(string: "https://cashvision.ai/privacy")!)
-                .font(.caption)
-            Link("Условия использования", destination: URL(string: "https://cashvision.ai/terms")!)
-                .font(.caption)
+            HStack(spacing: 16) {
+                Link("Политика конфиденциальности", destination: URL(string: "https://cashvision.ai/privacy")!)
+                Link("Условия использования", destination: URL(string: "https://cashvision.ai/terms")!)
+            }
+            .font(.caption)
         }
         .padding(.top, 8)
     }
@@ -118,30 +138,35 @@ struct FeatureRow: View {
     let subtitle: String
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.title3)
                 .foregroundStyle(.accent)
-                .frame(width: 32)
-            VStack(alignment: .leading) {
-                Text(title).font(.body.bold())
-                Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                .frame(width: 36, height: 36)
+                .background(.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.body.bold())
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             Spacer()
-            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+                .font(.title3)
         }
     }
 }
 
 struct PlanCard: View {
     let product: Product
-    let isPurchasing: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(product.displayName)
                         .font(.headline)
                     Text(product.description)
@@ -152,10 +177,13 @@ struct PlanCard: View {
                 Text(product.displayPrice)
                     .font(.headline)
             }
-            .padding()
-            .background(.accent.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
+            .padding(16)
+            .background(.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(.accent.opacity(0.2), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
-        .disabled(isPurchasing)
     }
 }

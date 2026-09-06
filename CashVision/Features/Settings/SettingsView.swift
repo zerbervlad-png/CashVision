@@ -22,17 +22,6 @@ struct SettingsView: View {
                     ))
                 }
 
-                Section("Камера и отдача") {
-                    Toggle("Тактильная отдача", isOn: Binding(
-                        get: { settings.hapticsEnabled },
-                        set: { settings.hapticsEnabled = $0 }
-                    ))
-                    Toggle("Авто-фонарик", isOn: Binding(
-                        get: { settings.autoTorchInLowLight },
-                        set: { settings.autoTorchInLowLight = $0 }
-                    ))
-                }
-
                 Section("Приватность") {
                     Toggle("Отправлять анонимную аналитику", isOn: Binding(
                         get: { settings.allowAnalytics },
@@ -42,25 +31,30 @@ struct SettingsView: View {
                         get: { settings.saveResultsToPhotos },
                         set: { settings.saveResultsToPhotos = $0 }
                     ))
-                    NavigationLink("Политика конфиденциальности") {
+                    NavigationLink {
                         PrivacyPolicyView()
+                    } label: {
+                        Label("Политика конфиденциальности", systemImage: "hand.raised.fill")
                     }
                 }
 
                 Section("О приложении") {
                     LabeledContent("Версия", value: appVersion)
                     LabeledContent("Сборка", value: buildNumber)
-                    Link("Сайт CashVision", destination: URL(string: "https://cashvision.ai")!)
-                    Link("Источник данных: cbr.ru", destination: URL(string: "https://www.cbr.ru/cash_circulation/banknotes/")!)
+                    LabeledContent("iOS", value: "26.0+")
+                    Link(destination: URL(string: "https://cashvision.ai")!) {
+                        Label("Сайт CashVision", systemImage: "globe")
+                    }
+                    Link(destination: URL(string: "https://www.cbr.ru/cash_circulation/banknotes/")!) {
+                        Label("Источник: cbr.ru", systemImage: "building.columns")
+                    }
                 }
 
                 Section {
-                    Button("Очистить все данные", role: .destructive) {
+                    Button(role: .destructive) {
                         settings.reset()
-                        SecurityService().delete(key: "subscription-cache")
-                    }
-                    Button("Сбросить настройки", role: .destructive) {
-                        settings.reset()
+                    } label: {
+                        Label("Сбросить настройки", systemImage: "arrow.counterclockwise")
                     }
                 }
             }
@@ -68,6 +62,7 @@ struct SettingsView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Готово") { dismiss() }
+                        .bold()
                 }
             }
         }
@@ -85,6 +80,7 @@ struct PrivacyPolicyView: View {
     var body: some View {
         ScrollView {
             Text(PrivacyPolicy.text)
+                .font(.body)
                 .padding()
         }
         .navigationTitle("Политика конфиденциальности")
