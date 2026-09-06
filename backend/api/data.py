@@ -1,0 +1,156 @@
+MODEL_VERSION = {
+    "name": "CashVisionBanknoteClassifier",
+    "version": "1.0.0",
+    "min_ios_version": "17.0",
+    "download_url": None,
+    "checksum": None,
+}
+
+
+def _make_security_features(features: list[dict]) -> list[dict]:
+    return features
+
+
+RUB_5000_FEATURES = [
+    {
+        "type": "watermark",
+        "title": "Водяной знак",
+        "short_description": "Многотоновый водяной знак с портретом Н.Н. Муравьёва-Амурского",
+        "instructions": ["Посмотрите банкноту на просвет", "Найдите портрет в светлой части поля"],
+        "check_methods": ["on_light"],
+        "position": {"x": 0.08, "y": 0.5},
+        "visible_on_side": "front",
+    },
+    {
+        "type": "security_thread",
+        "title": "Защитная нить",
+        "short_description": "Внедрённая защитная нить с окнами",
+        "instructions": ["Посмотрите банкноту на просвет"],
+        "check_methods": ["on_light", "on_angle"],
+        "position": {"x": 0.45, "y": 0.1},
+        "visible_on_side": "front",
+    },
+    {
+        "type": "microperforation",
+        "title": "Микроперфорация",
+        "short_description": "Отверстия, образующие число «5000»",
+        "instructions": ["Посмотрите банкноту на просвет"],
+        "check_methods": ["on_light"],
+        "position": {"x": 0.85, "y": 0.5},
+        "visible_on_side": "front",
+    },
+]
+
+
+BANKNOTES_DATASET = [
+    {
+        "id": "rub-5000",
+        "currency": "RUB",
+        "denomination_value": 5000,
+        "issue_year": 2010,
+        "series": "Модификация 2010 года",
+        "front_image_name": "rub5000_front",
+        "back_image_name": "rub5000_back",
+        "security_features": RUB_5000_FEATURES,
+        "official_description": "Банкнота номиналом 5000 рублей.",
+        "official_source_url": "https://www.cbr.ru/cash_circulation/banknotes/5000rub/",
+        "supported_checks": ["watermark", "security_thread", "microperforation", "relief", "kinematic_element", "latent_image", "microtext"],
+        "accessibility_description": "Банкнота 5000 рублей. Хабаровск.",
+    },
+    {
+        "id": "rub-1000",
+        "currency": "RUB",
+        "denomination_value": 1000,
+        "issue_year": 2010,
+        "series": "Модификация 2010 года",
+        "front_image_name": "rub1000_front",
+        "back_image_name": "rub1000_back",
+        "security_features": [
+            {
+                "type": "watermark",
+                "title": "Водяной знак",
+                "short_description": "Водяной знак с памятником Ярославу Мудрому",
+                "instructions": ["Посмотрите банкноту на просвет"],
+                "check_methods": ["on_light"],
+                "position": {"x": 0.08, "y": 0.5},
+                "visible_on_side": "front",
+            },
+        ],
+        "official_description": "Банкнота 1000 рублей.",
+        "official_source_url": "https://www.cbr.ru/cash_circulation/banknotes/1000rub/",
+        "supported_checks": ["watermark", "security_thread", "microperforation", "relief"],
+        "accessibility_description": "Банкнота 1000 рублей. Ярославль.",
+    },
+    {
+        "id": "rub-500",
+        "currency": "RUB",
+        "denomination_value": 500,
+        "issue_year": 2010,
+        "series": "Модификация 2010 года",
+        "front_image_name": "rub500_front",
+        "back_image_name": "rub500_back",
+        "security_features": [
+            {
+                "type": "watermark",
+                "title": "Водяной знак",
+                "short_description": "Водяной знак с памятником Петру I",
+                "instructions": ["Посмотрите банкноту на просвет"],
+                "check_methods": ["on_light"],
+                "position": {"x": 0.08, "y": 0.5},
+                "visible_on_side": "front",
+            },
+        ],
+        "official_description": "Банкнота 500 рублей.",
+        "official_source_url": "https://www.cbr.ru/cash_circulation/banknotes/500rub/",
+        "supported_checks": ["watermark", "security_thread", "microperforation", "relief"],
+        "accessibility_description": "Банкнота 500 рублей. Архангельск.",
+    },
+    {
+        "id": "rub-200",
+        "currency": "RUB",
+        "denomination_value": 200,
+        "issue_year": 2017,
+        "series": "Образца 2017 года",
+        "front_image_name": "rub200_front",
+        "back_image_name": "rub200_back",
+        "security_features": [
+            {
+                "type": "watermark",
+                "title": "Водяной знак",
+                "short_description": "Водяной знак",
+                "instructions": ["Посмотрите банкноту на просвет"],
+                "check_methods": ["on_light"],
+                "position": {"x": 0.1, "y": 0.5},
+                "visible_on_side": "front",
+            },
+        ],
+        "official_description": "Банкнота 200 рублей.",
+        "official_source_url": "https://www.cbr.ru/cash_circulation/banknotes/200rub/",
+        "supported_checks": ["watermark", "security_thread", "kinematic_element"],
+        "accessibility_description": "Банкнота 200 рублей. Севастополь.",
+    },
+    {
+        "id": "rub-100",
+        "currency": "RUB",
+        "denomination_value": 100,
+        "issue_year": 2010,
+        "series": "Модификация 2010 года",
+        "front_image_name": "rub100_front",
+        "back_image_name": "rub100_back",
+        "security_features": [
+            {
+                "type": "watermark",
+                "title": "Водяной знак",
+                "short_description": "Водяной знак с Аполлоном",
+                "instructions": ["Посмотрите банкноту на просвет"],
+                "check_methods": ["on_light"],
+                "position": {"x": 0.08, "y": 0.5},
+                "visible_on_side": "front",
+            },
+        ],
+        "official_description": "Банкнота 100 рублей.",
+        "official_source_url": "https://www.cbr.ru/cash_circulation/banknotes/100rub/",
+        "supported_checks": ["watermark", "security_thread", "microperforation", "relief"],
+        "accessibility_description": "Банкнота 100 рублей. Москва.",
+    },
+]

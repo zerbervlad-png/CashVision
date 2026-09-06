@@ -1,0 +1,55 @@
+name: Backend Tests
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Install dependencies
+        working-directory: backend
+        run: |
+          pip install \
+            "fastapi==0.115.0" \
+            "uvicorn[standard]==0.30.6" \
+            "pydantic==2.9.2" \
+            "pydantic-settings==2.5.2" \
+            "prometheus-client==0.20.0" \
+            "slowapi==0.1.9" \
+            "sqlalchemy==2.0.35" \
+            "asyncpg==0.29.0" \
+            "redis==5.0.8" \
+            "pytest==8.3.3" \
+            "pytest-asyncio==0.24.0" \
+            "httpx==0.27.2" \
+            "ruff==0.6.8"
+
+      - name: Lint
+        working-directory: backend
+        run: ruff check .
+
+      - name: Run tests
+        working-directory: backend
+        run: pytest -q
+
+      - name: Build Docker image
+        working-directory: backend
+        run: docker build -t cashvision-backend:ci .
