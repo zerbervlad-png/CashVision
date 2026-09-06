@@ -32,6 +32,16 @@ final class SettingsStore {
         set { UserDefaults.standard.set(newValue, forKey: "allowAnalytics") }
     }
 
+    var hapticsEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: "hapticsEnabled") }
+    }
+
+    var autoTorchInLowLight: Bool {
+        get { UserDefaults.standard.object(forKey: "autoTorch") as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: "autoTorch") }
+    }
+
     var lastUsedMode: String {
         get { UserDefaults.standard.string(forKey: "lastMode") ?? "check" }
         set { UserDefaults.standard.set(newValue, forKey: "lastMode") }
@@ -41,6 +51,8 @@ final class SettingsStore {
         UserDefaults.standard.removeObject(forKey: "colorScheme")
         UserDefaults.standard.removeObject(forKey: "reduceMotion")
         UserDefaults.standard.removeObject(forKey: "saveResultsToPhotos")
+        UserDefaults.standard.removeObject(forKey: "hapticsEnabled")
+        UserDefaults.standard.removeObject(forKey: "autoTorch")
     }
 }
 

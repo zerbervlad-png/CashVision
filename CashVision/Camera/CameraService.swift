@@ -17,6 +17,7 @@ final class CameraService: NSObject {
 
     private(set) var status: Status = .notDetermined
     private(set) var permissionGranted: Bool = false
+    private(set) var isTorchOn: Bool = false
     private let session = AVCaptureSession()
     private let videoQueue = DispatchQueue(label: "ai.cashvision.camera.queue", qos: .userInitiated)
     private var frameOutput: AVCaptureVideoDataOutput?
@@ -91,6 +92,27 @@ final class CameraService: NSObject {
         videoQueue.async {
             output.setSampleBufferDelegate(delegate, queue: self.videoQueue)
         }
+    }
+
+    func setTorch(enabled: Bool) async {
+        guard let device = AVCaptureDevice.default(for: .video),
+              device.hasTorch else {
+            AppLogger.camera.notice("Torch not available on this device")
+            return
+        }
+        do {
+            device.lockForConfiguration()
+            try device.setTorchModeOn(level: enabled ? 1.0 : 0.0)
+            device.unlockForConfiguration()
+            await MainActor.run { self.isTorchOn = enabled }
+            AppLogger.camera.info("Torch \(enabled ? "on" : "off")")
+        } catch {
+            AppLogger.camera.error("Torch toggle failed: \(error.localizedDescription)")
+        }
+    }
+
+    func toggleTorch() async {
+        await setTorch(enabled: !isTorchOn)
     }
 
     private func configureSession() {

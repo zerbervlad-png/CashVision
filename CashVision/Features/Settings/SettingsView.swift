@@ -22,6 +22,17 @@ struct SettingsView: View {
                     ))
                 }
 
+                Section("Камера и отдача") {
+                    Toggle("Тактильная отдача", isOn: Binding(
+                        get: { settings.hapticsEnabled },
+                        set: { settings.hapticsEnabled = $0 }
+                    ))
+                    Toggle("Авто-фонарик", isOn: Binding(
+                        get: { settings.autoTorchInLowLight },
+                        set: { settings.autoTorchInLowLight = $0 }
+                    ))
+                }
+
                 Section("Приватность") {
                     Toggle("Отправлять анонимную аналитику", isOn: Binding(
                         get: { settings.allowAnalytics },
@@ -44,6 +55,10 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    Button("Очистить все данные", role: .destructive) {
+                        settings.reset()
+                        SecurityService().delete(key: "subscription-cache")
+                    }
                     Button("Сбросить настройки", role: .destructive) {
                         settings.reset()
                     }
