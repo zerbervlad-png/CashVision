@@ -2,6 +2,19 @@
 
 Документ ведётся по принципу **Failure-Driven Development**: проблемы не скрываются, а явно фиксируются с указанием причины, влияния и обходного пути.
 
+> **Решённые в `feature/uat-security-compliance`:**
+> - Удалён невалидный ключ `NSPrivacyAccessedAPICamera` из Privacy Manifest (блокировал App Store review).
+> - `UIRequiredDeviceCapabilities` исправлен с `armv7` на `arm64`.
+> - Backend CORS: убран `*`, `allow_credentials=False`, ограниченные methods/headers.
+> - Backend: добавлены security headers `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cache-Control: no-store`.
+> - Backend: `/metrics` защищён Bearer-токеном в production.
+> - Backend: валидация серийного номера по regex (защита от log/DB injection).
+> - `SecurityService.save` теперь throws на ошибку Keychain.
+> - Добавлены: авто-фонарик, тактильная отдача, расширенные Settings.
+> - Backend-тесты расширены до 17 шт. (security + валидация).
+> - Locust: профили baseline/peak/stress/soak.
+> - UAT-план: `docs/UAT.md` (124 сценария, 5 ролей, OWASP MASVS L1 чек-лист).
+
 ## 1. ML-модели распознавания банкнот — заглушки
 
 - **Проблема.** В `CashVision/ComputerVision/Models/MLModels.swift` реализованы stub-классы `StubBanknoteDetector`, `StubBanknoteClassifier`, `StubBanknoteQualityModel`. Реальные Core ML модели (`BanknoteDetector.mlmodel`, `BanknoteClassifier.mlmodel`, `BanknoteQualityModel.mlmodel`) отсутствуют в репозитории — их нужно обучить и добавить в проект.

@@ -15,12 +15,18 @@
 ## 2. Security Review
 
 - ✅ Keychain используется для секретов (`SecurityService`).
+- ✅ `SecurityService.save` теперь throws на ошибку Keychain (раньше молчал).
 - ✅ HTTPS для backend; Nginx включает HSTS.
 - ✅ API keys не хранятся в приложении.
 - ✅ Логи не содержат персональных данных/серийных номеров/платёжных данных.
 - ✅ Rate limiting на backend (`slowapi`) и в `APIClient`.
 - ✅ Request ID propagation (`X-Request-ID`).
 - ✅ Certificate validation — по умолчанию URLSession.
+- ✅ Backend: CORS whitelist (не `*`), `allow_credentials=False`, ограниченные методы/headers.
+- ✅ Backend: security headers `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cache-Control: no-store`.
+- ✅ Backend: валидация серийного номера по regex (защита от log/DB injection).
+- ✅ Backend: `/metrics` защищён Bearer-токеном в production.
+- ✅ Backend: OpenAPI/docs отключены в production.
 - ⚠️ Jailbreak detection не реализован — не критично для приложения проверки банкнот.
 
 ## 3. Privacy Review
@@ -32,6 +38,8 @@
 - ✅ Аналитика опциональна, отключается в Настройках.
 - ✅ История хранится локально (SwiftData).
 - ✅ Privacy Policy в `SettingsView.PrivacyPolicyView`.
+- ✅ Удалён невалидный ключ `NSPrivacyAccessedAPICamera` (Camera — это permission, не required-reason API; невалидный ключ грозил App Store rejection).
+- ✅ `UIRequiredDeviceCapabilities` исправлен с `armv7` на `arm64` (armv7 не поддерживается с iOS 11).
 
 ## 4. UX Review
 

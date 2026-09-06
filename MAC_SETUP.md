@@ -176,11 +176,17 @@ brew install xcodegen
 | `feature/backend` | Разработка backend |
 | `feature/ml-models` | ML-модели распознавания |
 | `feature/tests` | Тесты |
+| `feature/uat-security-compliance` | **UAT + security-аудит + App Store compliance + новые фичи (flashlight, haptics, Settings). Все последние правки.** |
 
 Переключение:
 ```bash
 git checkout develop
 git pull origin develop
+
+# Получить UAT/security-правки:
+git fetch origin
+git checkout feature/uat-security-compliance
+git pull origin feature/uat-security-compliance
 ```
 
 ---

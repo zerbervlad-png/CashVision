@@ -71,6 +71,26 @@ chmod +x run-mac.sh
 ./run-mac.sh
 ```
 
+### Получить последние правки (UAT + security + новые фичи)
+
+```bash
+# С нуля:
+git clone -b feature/uat-security-compliance https://github.com/zerbervlad-png/CashVision.git
+cd CashVision
+./run-mac.sh
+
+# Если репозиторий уже склонирован:
+git fetch origin
+git checkout feature/uat-security-compliance
+git pull origin feature/uat-security-compliance
+./run-mac.sh
+```
+
+> Ветка `feature/uat-security-compliance` содержит: UAT-план (`docs/UAT.md`),
+> исправления security-аудита (OWASP MASVS L1), App Store compliance, новые
+> фичи (авто-фонарик, тактильная отдача), расширенные backend-тесты (17 шт.)
+> и locust-профили (baseline/peak/stress/soak).
+
 Скрипт:
 1. Проверяет macOS, Xcode, Swift.
 2. Устанавливает XcodeGen (через Homebrew) при отсутствии.
