@@ -73,7 +73,7 @@ struct HistoryRowView: View {
                 Spacer()
                 Text(amountFormatter.string(from: NSNumber(value: entry.totalAmount)) ?? "\(entry.totalAmount) ₽")
                     .font(.headline)
-                    .foregroundStyle(.accent)
+                    .foregroundStyle(Color.accentColor)
             }
 
             HStack {

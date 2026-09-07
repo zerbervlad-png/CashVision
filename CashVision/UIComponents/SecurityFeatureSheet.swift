@@ -12,9 +12,9 @@ struct SecurityFeatureSheet: View {
                     HStack(spacing: 14) {
                         Image(systemName: icon)
                             .font(.largeTitle)
-                            .foregroundStyle(.accent)
+                            .foregroundStyle(Color.accentColor)
                             .frame(width: 48, height: 48)
-                            .background(.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                            .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
                         VStack(alignment: .leading, spacing: 2) {
                             Text(feature.title)
                                 .font(.title3.bold())
@@ -37,7 +37,7 @@ struct SecurityFeatureSheet: View {
                                     .font(.caption.bold())
                                     .foregroundStyle(.white)
                                     .frame(width: 22, height: 22)
-                                    .background(.accent, in: Circle())
+                                    .background(Color.accentColor, in: Circle())
                                 Text(instruction)
                                     .font(.subheadline)
                             }

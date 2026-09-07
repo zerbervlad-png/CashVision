@@ -79,7 +79,7 @@ struct CountView: View {
         VStack(spacing: 20) {
             Image(systemName: "plus.app.fill")
                 .font(.system(size: 56, weight: .light))
-                .foregroundStyle(.accent)
+                .foregroundStyle(Color.accentColor)
                 .symbolEffect(.pulse, options: .repeating)
 
             VStack(spacing: 8) {

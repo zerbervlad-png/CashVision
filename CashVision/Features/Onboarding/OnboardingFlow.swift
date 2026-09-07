@@ -82,7 +82,7 @@ struct OnboardingPageView: View {
         VStack(spacing: 20) {
             Image(systemName: page.icon)
                 .font(.system(size: 72, weight: .light))
-                .foregroundStyle(.accent)
+                .foregroundStyle(Color.accentColor)
                 .symbolEffect(.pulse, options: .repeating)
 
             VStack(spacing: 10) {

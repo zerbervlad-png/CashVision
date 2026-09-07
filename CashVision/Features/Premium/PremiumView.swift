@@ -19,7 +19,6 @@ struct PremiumView: View {
             }
             .navigationTitle("Premium")
             .navigationBarTitleDisplayMode(.large)
-            .scrollEdgeEffectStyle(.hard, for: .top)
         }
         .task { await manager.loadProducts() }
     }
@@ -141,9 +140,9 @@ struct FeatureRow: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(.accent)
+                .foregroundStyle(Color.accentColor)
                 .frame(width: 36, height: 36)
-                .background(.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+                .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.body.bold())
@@ -178,10 +177,10 @@ struct PlanCard: View {
                     .font(.headline)
             }
             .padding(16)
-            .background(.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+            .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(.accent.opacity(0.2), lineWidth: 1)
+                    .stroke(Color.accentColor.opacity(0.2), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
