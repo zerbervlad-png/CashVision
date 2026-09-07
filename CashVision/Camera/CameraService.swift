@@ -63,7 +63,7 @@ final class CameraService: NSObject {
     func configure() async {
         guard status == .ready || status == .running else { return }
         let session = self.session
-        let result: ConfigureResult = await withCheckedContinuation { continuation in
+        let result: ConfigureResult = await withCheckedContinuation { (continuation: CheckedContinuation<ConfigureResult, Never>) in
             videoQueue.async {
                 let res = Self.configureSession(session)
                 continuation.resume(returning: res)
@@ -83,16 +83,18 @@ final class CameraService: NSObject {
 
     func start() {
         let session = self.session
-        videoQueue.async {
+        let queue = self.videoQueue
+        queue.async { [weak self] in
             guard session.isRunning == false else { return }
             session.startRunning()
-            DispatchQueue.main.async { self.status = .running }
+            Task { @MainActor [weak self] in self?.status = .running }
         }
     }
 
     func stop() {
         let session = self.session
-        videoQueue.async {
+        let queue = self.videoQueue
+        queue.async {
             if session.isRunning {
                 session.stopRunning()
                 AppLogger.camera.notice("Camera session stopped")
