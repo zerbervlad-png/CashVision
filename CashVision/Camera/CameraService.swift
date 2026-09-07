@@ -115,7 +115,7 @@ final class CameraService: NSObject {
             return
         }
         do {
-            device.lockForConfiguration()
+            try device.lockForConfiguration()
             try device.setTorchModeOn(level: enabled ? 1.0 : 0.0)
             device.unlockForConfiguration()
             self.isTorchOn = enabled

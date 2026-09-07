@@ -117,7 +117,7 @@ struct CheckView: View {
 
     init(container: AppContainer) {
         self.container = container
-        _viewModel = State(initializedValue: CheckViewModel(container: container))
+        _viewModel = State(initialValue: CheckViewModel(container: container))
     }
 
     var body: some View {

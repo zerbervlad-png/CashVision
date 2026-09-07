@@ -7,7 +7,7 @@ struct CashVisionApp: App {
 
     init() {
         AppLogger.bootstrap()
-        _appContainer = State(initializedValue: AppContainer())
+        _appContainer = State(initialValue: AppContainer())
     }
 
     var body: some Scene {
