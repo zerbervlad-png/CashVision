@@ -4,8 +4,7 @@ import XCTest
 final class CashVisionUITests: XCTestCase {
     var app: XCUIApplication!
 
-    @MainActor
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments = ["-UITests", "YES"]
