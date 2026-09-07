@@ -2,16 +2,19 @@ import Foundation
 import CoreML
 import Vision
 
-protocol BanknoteDetectorModel: Sendable {
-    nonisolated func detect(in pixelBuffer: CVPixelBuffer) async throws -> [BanknoteDetection]
+@MainActor
+protocol BanknoteDetectorModel {
+    func detect(in pixelBuffer: CVPixelBuffer) async throws -> [BanknoteDetection]
 }
 
-protocol BanknoteClassifierModel: Sendable {
-    nonisolated func classify(buffer: CVPixelBuffer) async throws -> BanknoteClassification
+@MainActor
+protocol BanknoteClassifierModel {
+    func classify(buffer: CVPixelBuffer) async throws -> BanknoteClassification
 }
 
-protocol BanknoteQualityModel: Sendable {
-    nonisolated func assess(buffer: CVPixelBuffer) async throws -> BanknoteQualityAssessment
+@MainActor
+protocol BanknoteQualityModel {
+    func assess(buffer: CVPixelBuffer) async throws -> BanknoteQualityAssessment
 }
 
 struct BanknoteDetection: Sendable {
@@ -39,21 +42,23 @@ struct BanknoteQualityAssessment: Sendable, Equatable {
     let issues: [Issue]
 }
 
-/// Stub-реализации моделей. На Mac с Xcode заменяются на скомпилированные .mlmodel классы.
+@MainActor
 final class StubBanknoteDetector: BanknoteDetectorModel {
-    nonisolated func detect(in pixelBuffer: CVPixelBuffer) async throws -> [BanknoteDetection] {
+    func detect(in pixelBuffer: CVPixelBuffer) async throws -> [BanknoteDetection] {
         return []
     }
 }
 
+@MainActor
 final class StubBanknoteClassifier: BanknoteClassifierModel {
-    nonisolated func classify(buffer: CVPixelBuffer) async throws -> BanknoteClassification {
+    func classify(buffer: CVPixelBuffer) async throws -> BanknoteClassification {
         throw AppError.recognitionFailed
     }
 }
 
+@MainActor
 final class StubBanknoteQualityModel: BanknoteQualityModel {
-    nonisolated func assess(buffer: CVPixelBuffer) async throws -> BanknoteQualityAssessment {
+    func assess(buffer: CVPixelBuffer) async throws -> BanknoteQualityAssessment {
         BanknoteQualityAssessment(overallScore: 1.0, issues: [])
     }
 }

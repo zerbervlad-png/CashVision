@@ -18,7 +18,7 @@ actor RateLimiter {
     }
 }
 
-final class APIClient {
+final class APIClient: Sendable {
     let baseURL: URL
     private let session: URLSession
     private let decoder: JSONDecoder

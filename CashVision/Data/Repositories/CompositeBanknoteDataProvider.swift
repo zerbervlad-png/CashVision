@@ -1,6 +1,6 @@
 import Foundation
 
-final class CompositeBanknoteDataProvider: BanknoteDataProvider {
+final class CompositeBanknoteDataProvider: BanknoteDataProvider, Sendable {
     private let local: BanknoteDataProvider
     private let remote: BanknoteDataProvider
 

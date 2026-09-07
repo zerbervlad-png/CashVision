@@ -6,7 +6,7 @@ import CoreML
 
 @MainActor
 @Observable
-final class BanknoteRecognitionService: NSObject {
+final class BanknoteRecognitionService {
     private let detector: BanknoteDetectorModel
     private let classifier: BanknoteClassifierModel
     private let qualityModel: BanknoteQualityModel
@@ -25,7 +25,6 @@ final class BanknoteRecognitionService: NSObject {
         self.classifier = classifier
         self.qualityModel = qualityModel
         self.frameThrottler = FrameThrottler(targetFPS: inferenceFPS)
-        super.init()
     }
 
     func processFrame(_ buffer: CVPixelBuffer) async {
@@ -69,13 +68,13 @@ final class BanknoteRecognitionService: NSObject {
     }
 }
 
-struct RecognitionResult: Equatable {
+struct RecognitionResult: Equatable, Sendable {
     let banknotes: [RecognizedBanknote]
     let quality: BanknoteQualityAssessment
     let timestamp: Date
 }
 
-final class FrameThrottler {
+final class FrameThrottler: @unchecked Sendable {
     private var targetFPS: Double
     private var lastProcessed: Date = .distantPast
     private let lock = NSLock()

@@ -22,7 +22,7 @@ struct SerialVerificationResult: Sendable, Hashable {
     let message: String
 }
 
-final class CompositeSerialVerificationProvider: BanknoteSerialVerificationProvider {
+final class CompositeSerialVerificationProvider: BanknoteSerialVerificationProvider, Sendable {
     private let providers: [BanknoteSerialVerificationProvider]
 
     init(providers: [BanknoteSerialVerificationProvider] = []) {
@@ -48,7 +48,7 @@ final class CompositeSerialVerificationProvider: BanknoteSerialVerificationProvi
     var isAvailable: Bool { providers.contains { $0.isAvailable } }
 }
 
-final class NoOfficialSourceSerialProvider: BanknoteSerialVerificationProvider {
+final class NoOfficialSourceSerialProvider: BanknoteSerialVerificationProvider, Sendable {
     var isAvailable: Bool { false }
     func checkSerialNumber(_ serial: String) async throws -> SerialVerificationResult {
         SerialVerificationResult(

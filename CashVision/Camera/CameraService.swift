@@ -62,26 +62,39 @@ final class CameraService: NSObject {
 
     func configure() async {
         guard status == .ready || status == .running else { return }
-        await withCheckedContinuation { continuation in
+        let session = self.session
+        let result: ConfigureResult = await withCheckedContinuation { continuation in
             videoQueue.async {
-                self.configureSession()
-                continuation.resume()
+                let res = Self.configureSession(session)
+                continuation.resume(returning: res)
             }
+        }
+        switch result {
+        case .success(let output):
+            self.frameOutput = output
+            self.isConfigured = true
+            AppLogger.camera.info("Camera session configured")
+        case .failure(let message):
+            self.status = .failed(message)
+        case .noCamera:
+            self.status = .failed("No camera available")
         }
     }
 
     func start() {
+        let session = self.session
         videoQueue.async {
-            guard self.session.isRunning == false else { return }
-            self.session.startRunning()
+            guard session.isRunning == false else { return }
+            session.startRunning()
             DispatchQueue.main.async { self.status = .running }
         }
     }
 
     func stop() {
+        let session = self.session
         videoQueue.async {
-            if self.session.isRunning {
-                self.session.stopRunning()
+            if session.isRunning {
+                session.stopRunning()
                 AppLogger.camera.notice("Camera session stopped")
             }
         }
@@ -89,8 +102,9 @@ final class CameraService: NSObject {
 
     func setDelegate(_ delegate: AVCaptureVideoDataOutputSampleBufferDelegate) {
         guard let output = frameOutput else { return }
+        let queue = self.videoQueue
         videoQueue.async {
-            output.setSampleBufferDelegate(delegate, queue: self.videoQueue)
+            output.setSampleBufferDelegate(delegate, queue: queue)
         }
     }
 
@@ -104,7 +118,7 @@ final class CameraService: NSObject {
             device.lockForConfiguration()
             try device.setTorchModeOn(level: enabled ? 1.0 : 0.0)
             device.unlockForConfiguration()
-            await MainActor.run { self.isTorchOn = enabled }
+            self.isTorchOn = enabled
             AppLogger.camera.info("Torch \(enabled ? "on" : "off")")
         } catch {
             AppLogger.camera.error("Torch toggle failed: \(error.localizedDescription)")
@@ -115,34 +129,38 @@ final class CameraService: NSObject {
         await setTorch(enabled: !isTorchOn)
     }
 
-    private func configureSession() {
+    private enum ConfigureResult {
+        case success(AVCaptureVideoDataOutput)
+        case failure(String)
+        case noCamera
+    }
+
+    private nonisolated static func configureSession(_ session: AVCaptureSession) -> ConfigureResult {
         session.beginConfiguration()
+        defer { session.commitConfiguration() }
         session.sessionPreset = .high
-        if let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
-            do {
-                let input = try AVCaptureDeviceInput(device: device)
-                if session.canAddInput(input) {
-                    session.addInput(input)
-                }
-                let output = AVCaptureVideoDataOutput()
-                output.alwaysDiscardsLateVideoFrames = true
-                output.videoSettings = [
-                    kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
-                ]
-                if session.canAddOutput(output) {
-                    session.addOutput(output)
-                    frameOutput = output
-                }
-                isConfigured = true
-                AppLogger.camera.info("Camera session configured")
-            } catch {
-                AppLogger.camera.error("Camera config failed: \(error.localizedDescription)")
-                DispatchQueue.main.async { self.status = .failed(error.localizedDescription) }
-            }
-        } else {
-            DispatchQueue.main.async { self.status = .failed("No camera available") }
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) else {
+            return .noCamera
         }
-        session.commitConfiguration()
+        do {
+            let input = try AVCaptureDeviceInput(device: device)
+            if session.canAddInput(input) {
+                session.addInput(input)
+            }
+            let output = AVCaptureVideoDataOutput()
+            output.alwaysDiscardsLateVideoFrames = true
+            output.videoSettings = [
+                kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
+            ]
+            if session.canAddOutput(output) {
+                session.addOutput(output)
+                return .success(output)
+            }
+            return .failure("Could not add video output")
+        } catch {
+            AppLogger.camera.error("Camera config failed: \(error.localizedDescription)")
+            return .failure(error.localizedDescription)
+        }
     }
 
     func handleAppBackground() {

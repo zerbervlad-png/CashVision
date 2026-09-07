@@ -1,6 +1,6 @@
 import Foundation
 
-final class LocalBanknoteDataProvider: BanknoteDataProvider {
+final class LocalBanknoteDataProvider: BanknoteDataProvider, Sendable {
     private let bundle: Bundle
 
     init(bundle: Bundle = .main) {
