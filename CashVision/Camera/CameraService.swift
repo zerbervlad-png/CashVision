@@ -1,5 +1,5 @@
 import Foundation
-import AVFoundation
+@preconcurrency import AVFoundation
 import UIKit
 import Combine
 import Observation
@@ -131,7 +131,7 @@ final class CameraService: NSObject {
         await setTorch(enabled: !isTorchOn)
     }
 
-    private enum ConfigureResult: Sendable {
+    private enum ConfigureResult {
         case success(AVCaptureVideoDataOutput)
         case failure(String)
         case noCamera
