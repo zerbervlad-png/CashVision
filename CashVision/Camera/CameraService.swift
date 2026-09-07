@@ -129,7 +129,7 @@ final class CameraService: NSObject {
         await setTorch(enabled: !isTorchOn)
     }
 
-    private enum ConfigureResult {
+    private enum ConfigureResult: Sendable {
         case success(AVCaptureVideoDataOutput)
         case failure(String)
         case noCamera
