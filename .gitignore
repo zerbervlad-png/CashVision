@@ -71,3 +71,4 @@ logs/
 *.dSYM.zip
 *.dSYM
 nul
+build_logs*.txt
