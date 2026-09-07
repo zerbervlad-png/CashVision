@@ -3,6 +3,7 @@ import AVFoundation
 import CoreImage
 import Vision
 import CoreML
+import Observation
 
 @MainActor
 @Observable
