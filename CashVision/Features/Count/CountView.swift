@@ -293,7 +293,7 @@ struct CompletionSheet: View {
                     Image(systemName: "checkmark.seal.fill")
                         .font(.system(size: 48))
                         .foregroundStyle(.green)
-                        .symbolEffect(.bounce, options: .nonRepeating)
+                        .transition(.scale.combined(with: .opacity))
 
                     Text("Пересчёт завершён")
                         .font(.title2.bold())
