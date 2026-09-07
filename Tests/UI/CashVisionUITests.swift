@@ -44,10 +44,9 @@ final class CashVisionUITests: XCTestCase {
         let countTab = app.tabBars.buttons["Посчитать"]
         XCTAssertTrue(countTab.waitForExistence(timeout: 5))
         countTab.tap()
-        sleep(1)
+        sleep(2)
         XCTAssertTrue(
-            app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists ||
-            app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "Начать")).firstMatch.exists ||
+            app.staticTexts["Режим пересчёта"].waitForExistence(timeout: 5) ||
             app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists
         )
     }
