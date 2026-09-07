@@ -1,6 +1,6 @@
 import Foundation
 
-final class RemoteBanknoteDataProvider: BanknoteDataProvider {
+final class RemoteBanknoteDataProvider: BanknoteDataProvider, @unchecked Sendable {
     private let apiClient: APIClient
     private let endpoint = "/api/v1/banknotes"
 

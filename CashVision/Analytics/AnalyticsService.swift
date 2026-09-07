@@ -27,11 +27,14 @@ struct AnalyticsEvent: Sendable {
     }
 }
 
-final class AnalyticsService: AnalyticsClient {
+final class AnalyticsService: AnalyticsClient, @unchecked Sendable {
     private let userDefaults = UserDefaults.standard
     private let enabledKey = "allowAnalytics"
+    private let lock = NSLock()
 
     func track(_ event: AnalyticsEvent) {
+        lock.lock()
+        defer { lock.unlock() }
         guard userDefaults.object(forKey: enabledKey) as? Bool ?? true else { return }
         AppLogger.analytics.info("event=\(event.name.rawValue) props=\(event.properties)")
     }

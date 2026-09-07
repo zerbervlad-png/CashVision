@@ -13,9 +13,9 @@ final class CountingService {
     private(set) var totalAmount: Int = 0
     private(set) var isCounting = false
 
-    init(recognition: BanknoteRecognitionService, tracker: BanknoteTracker = BanknoteTracker()) {
+    init(recognition: BanknoteRecognitionService, tracker: BanknoteTracker? = nil) {
         self.recognition = recognition
-        self.tracker = tracker
+        self.tracker = tracker ?? BanknoteTracker()
     }
 
     func startCounting() {
