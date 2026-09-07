@@ -9,19 +9,18 @@ on:
 jobs:
   build-and-test:
     name: Build & Test (iOS)
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode (auto)
-        run: sudo xcode-select -s "$(xcode-select -p)"
+      - name: List available Xcode versions
+        run: ls /Applications | grep Xcode
 
-      - name: Show environment
+      - name: Select Xcode
         run: |
+          sudo xcode-select -s /Applications/Xcode.app/contents/Developer
           xcodebuild -version
-          swift --version
-          xcrun simctl list devices available | head -n 30
 
       - name: Install XcodeGen
         run: brew install xcodegen || brew upgrade xcodegen
