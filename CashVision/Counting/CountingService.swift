@@ -47,19 +47,13 @@ final class CountingService {
     }
 
     func increment(denomination: Denomination, by amount: Int = 1) {
-        counted[denomination, default: 0] += amount
-        if amount > 0 {
-            totalCount += amount
-            totalAmount += denomination.value * amount
-        } else if amount < 0 {
-            let current = counted[denomination, default: 0]
-            let new = max(0, current + amount)
-            let diff = current - new
-            counted[denomination] = new
-            if new == 0 { counted.removeValue(forKey: denomination) }
-            totalCount = max(0, totalCount - diff)
-            totalAmount = max(0, totalAmount - denomination.value * diff)
-        }
+        let current = counted[denomination, default: 0]
+        let newValue = max(0, current + amount)
+        let actualDiff = newValue - current
+        counted[denomination] = newValue
+        if newValue == 0 { counted.removeValue(forKey: denomination) }
+        totalCount = max(0, totalCount + actualDiff)
+        totalAmount = max(0, totalAmount + denomination.value * actualDiff)
     }
 
     func setCount(_ value: Int, for denomination: Denomination) {

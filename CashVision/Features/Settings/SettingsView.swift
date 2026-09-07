@@ -20,6 +20,17 @@ struct SettingsView: View {
                         get: { settings.reduceMotion },
                         set: { settings.reduceMotion = $0 }
                     ))
+                    Toggle("Тактильная отдача", isOn: Binding(
+                        get: { settings.hapticsEnabled },
+                        set: { settings.hapticsEnabled = $0 }
+                    ))
+                }
+
+                Section("Камера") {
+                    Toggle("Авто-фонарик", isOn: Binding(
+                        get: { settings.autoTorchInLowLight },
+                        set: { settings.autoTorchInLowLight = $0 }
+                    ))
                 }
 
                 Section("Приватность") {

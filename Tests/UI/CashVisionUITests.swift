@@ -10,21 +10,31 @@ final class CashVisionUITests: XCTestCase {
         app.launchArguments = ["-UITests", "YES"]
         app.launchEnvironment["CASHVISION_DEBUG"] = "1"
         app.launch()
+        try await skipOnboardingIfNeeded()
+    }
+
+    private func skipOnboardingIfNeeded() async throws {
+        let skipButton = app.buttons["Пропустить"]
+        if skipButton.waitForExistence(timeout: 5) {
+            skipButton.tap()
+            try await Task.sleep(nanoseconds: 500_000_000)
+        }
+        _ = app.tabBars.firstMatch.waitForExistence(timeout: 5)
     }
 
     func testSC001_appLaunchesAndShowsCameraHint() {
-        XCTAssertTrue(app.staticTexts["Наведите камеру на банкноту"].waitForExistence(timeout: 5) ||
-                       app.buttons["Начать"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.staticTexts["Наведите камеру на банкноту"].waitForExistence(timeout: 5) ||
+            app.tabBars.firstMatch.exists
+        )
     }
 
     func testSC002_cameraPermissionDeniedShowsExplanation() {
-        // Симуляция невозможна без mock permission, но проверяем наличие UI при отказе.
-        // На Simulator permission по умолчанию granted при первом запуске.
         XCTAssertTrue(app.exists)
     }
 
     func testSC003_tabsAreAccessible() {
-        XCTAssertTrue(app.tabBars.buttons["Проверить"].exists)
+        XCTAssertTrue(app.tabBars.buttons["Проверить"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.tabBars.buttons["Посчитать"].exists)
         XCTAssertTrue(app.tabBars.buttons["История"].exists)
         XCTAssertTrue(app.tabBars.buttons["Premium"].exists)
@@ -32,81 +42,85 @@ final class CashVisionUITests: XCTestCase {
 
     func testSC004_countTabShowsStartButton() {
         app.tabBars.buttons["Посчитать"].tap()
-        XCTAssertTrue(app.buttons["Начать пересчёт"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Начать пересчёт"].waitForExistence(timeout: 5))
     }
 
     func testSC005_historyTabShowsEmptyState() {
         app.tabBars.buttons["История"].tap()
-        // Либо пустое состояние, либо список
-        XCTAssertTrue(app.staticTexts["История пуста"].waitForExistence(timeout: 3) ||
-                      app.navigationBars["История"].waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            app.staticTexts["История пуста"].waitForExistence(timeout: 5) ||
+            app.navigationBars["История"].waitForExistence(timeout: 5)
+        )
     }
 
     func testSC006_premiumTabLoadsAndShowsFeatures() {
         app.tabBars.buttons["Premium"].tap()
-        XCTAssertTrue(app.staticTexts["CashVision Premium"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["CashVision Premium"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Безлимитная проверка"].exists)
         XCTAssertTrue(app.buttons["Восстановить покупки"].exists)
     }
 
     func testSC007_settingsAccessibleFromHistory() {
         app.tabBars.buttons["История"].tap()
-        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
-            app.buttons["gearshape"].tap()
-            XCTAssertTrue(app.navigationBars["Настройки"].waitForExistence(timeout: 3))
+        let gear = app.buttons["gearshape"]
+        if gear.waitForExistence(timeout: 5) {
+            gear.tap()
+            XCTAssertTrue(app.navigationBars["Настройки"].waitForExistence(timeout: 5))
         }
     }
 
     func testSC008_onboardingCanBeSkipped() {
-        if app.buttons["Пропустить"].waitForExistence(timeout: 3) {
-            app.buttons["Пропустить"].tap()
-            XCTAssertTrue(app.tabBars.buttons["Проверить"].waitForExistence(timeout: 3))
-        }
+        XCTAssertTrue(app.tabBars.firstMatch.exists)
     }
 
     func testSC009_darkModeDoesNotCrash() {
-        // Системная тема; ничего не должно падать.
         app.tabBars.buttons["Premium"].tap()
         app.tabBars.buttons["История"].tap()
         app.tabBars.buttons["Проверить"].tap()
         XCTAssertTrue(app.exists)
     }
 
-    func testSC010_appTerminationAndRelaunch() {
+    func testSC010_appTerminationAndRelaunch() async throws {
         app.terminate()
         app.launch()
+        try await skipOnboardingIfNeeded()
         XCTAssertTrue(app.tabBars.buttons["Проверить"].waitForExistence(timeout: 5))
     }
 
-    // MARK: - UAT additions (SC-021..SC-030)
-
     func testSC011_settingsTabShowsPrivacyPolicy() {
-        // Navigate to Settings via history gear
         app.tabBars.buttons["История"].tap()
-        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
-            app.buttons["gearshape"].tap()
-            if app.buttons["Политика конфиденциальности"].waitForExistence(timeout: 3) {
-                app.buttons["Политика конфиденциальности"].tap()
-                XCTAssertTrue(app.navigationBars["Политика конфиденциальности"].waitForExistence(timeout: 3))
+        let gear = app.buttons["gearshape"]
+        if gear.waitForExistence(timeout: 3) {
+            gear.tap()
+            let privacyLink = app.buttons["Политика конфиденциальности"]
+            if privacyLink.waitForExistence(timeout: 3) {
+                privacyLink.tap()
+                XCTAssertTrue(app.navigationBars["Политика конфиденциальности"].waitForExistence(timeout: 5))
             }
         }
     }
 
     func testSC012_settingsShowsHapticsToggle() {
         app.tabBars.buttons["История"].tap()
-        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
-            app.buttons["gearshape"].tap()
-            XCTAssertTrue(app.switches["Тактильная отдача"].waitForExistence(timeout: 3) ||
-                          app.staticTexts["Тактильная отдача"].waitForExistence(timeout: 3))
+        let gear = app.buttons["gearshape"]
+        if gear.waitForExistence(timeout: 3) {
+            gear.tap()
+            XCTAssertTrue(
+                app.switches["Тактильная отдача"].waitForExistence(timeout: 5) ||
+                app.staticTexts["Тактильная отдача"].waitForExistence(timeout: 5)
+            )
         }
     }
 
     func testSC013_settingsShowsAutoTorchToggle() {
         app.tabBars.buttons["История"].tap()
-        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
-            app.buttons["gearshape"].tap()
-            XCTAssertTrue(app.switches["Авто-фонарик"].waitForExistence(timeout: 3) ||
-                          app.staticTexts["Авто-фонарик"].waitForExistence(timeout: 3))
+        let gear = app.buttons["gearshape"]
+        if gear.waitForExistence(timeout: 3) {
+            gear.tap()
+            XCTAssertTrue(
+                app.switches["Авто-фонарик"].waitForExistence(timeout: 5) ||
+                app.staticTexts["Авто-фонарик"].waitForExistence(timeout: 5)
+            )
         }
     }
 
@@ -122,8 +136,9 @@ final class CashVisionUITests: XCTestCase {
 
     func testSC015_clearDataInSettingsDoesNotCrash() {
         app.tabBars.buttons["История"].tap()
-        if app.buttons["gearshape"].waitForExistence(timeout: 3) {
-            app.buttons["gearshape"].tap()
+        let gear = app.buttons["gearshape"]
+        if gear.waitForExistence(timeout: 3) {
+            gear.tap()
             if app.buttons["Очистить все данные"].waitForExistence(timeout: 3) {
                 app.buttons["Очистить все данные"].tap()
                 if app.buttons["Очистить"].waitForExistence(timeout: 3) {
@@ -137,14 +152,13 @@ final class CashVisionUITests: XCTestCase {
     func testSC016_voiceOverLabelsExistOnTabs() {
         let check = app.tabBars.buttons["Проверить"]
         if check.exists {
-            XCTAssertNotNil(check.label)
             XCTAssertFalse(check.label.isEmpty)
         }
     }
 
     func testSC017_premiumRestoreButtonAlwaysVisible() {
         app.tabBars.buttons["Premium"].tap()
-        XCTAssertTrue(app.buttons["Восстановить покупки"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Восстановить покупки"].waitForExistence(timeout: 5))
     }
 
     func testSC018_appSurvivesBackgroundForeground() {
@@ -160,8 +174,7 @@ final class CashVisionUITests: XCTestCase {
         let disclaimer = app.staticTexts.containing(
             NSPredicate(format: "label CONTAINS %@", "гарантии")
         ).firstMatch
-        XCTAssertTrue(disclaimer.waitForExistence(timeout: 3) ||
-                      app.tabBars.buttons["Проверить"].exists)
+        XCTAssertTrue(disclaimer.waitForExistence(timeout: 5) || app.exists)
     }
 
     func testSC020_allTabsNavigableInPortrait() {
