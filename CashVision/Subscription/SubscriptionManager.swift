@@ -16,7 +16,7 @@ final class SubscriptionManager {
     let productIDs: Set<String>
     private(set) var products: [Product] = []
     private(set) var status: Status = .unknown
-    private var transactionListener: Task<Void, Never>?
+    private nonisolated(unsafe) var transactionListener: Task<Void, Never>?
 
     init(productIDs: Set<String>) {
         self.productIDs = productIDs
@@ -25,10 +25,8 @@ final class SubscriptionManager {
         Task { await refreshStatus() }
     }
 
-    nonisolated deinit {
-        Task { @MainActor in
-            self.transactionListener?.cancel()
-        }
+    deinit {
+        transactionListener?.cancel()
     }
 
     func loadProducts() async {
