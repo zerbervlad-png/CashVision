@@ -20,17 +20,22 @@ final class SubscriptionManager {
 
     init(productIDs: Set<String>) {
         self.productIDs = productIDs
-        transactionListener = listenForTransactions()
+        let listener = listenForTransactions()
+        transactionListener = listener
         Task { await refreshStatus() }
     }
 
-    deinit { transactionListener?.cancel() }
+    nonisolated deinit {
+        Task { @MainActor in
+            self.transactionListener?.cancel()
+        }
+    }
 
     func loadProducts() async {
         do {
             let storeProducts = try await Product.products(for: productIDs)
             self.products = storeProducts.sorted { $0.price < $1.price }
-            AppLogger.subscription.info("Loaded \(products.count) products")
+            AppLogger.subscription.info("Loaded \(self.products.count) products")
         } catch {
             AppLogger.subscription.error("Failed to load products: \(error.localizedDescription)")
             self.status = .error("Не удалось загрузить тарифы")
