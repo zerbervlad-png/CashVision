@@ -42,7 +42,10 @@ final class CashVisionUITests: XCTestCase {
 
     func testSC004_countTabShowsStartButton() {
         app.tabBars.buttons["Посчитать"].tap()
-        XCTAssertTrue(app.buttons["Начать пересчёт"].waitForExistence(timeout: 5))
+        let startButton = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS %@", "пересчёт")
+        ).firstMatch
+        XCTAssertTrue(startButton.waitForExistence(timeout: 5))
     }
 
     func testSC005_historyTabShowsEmptyState() {
