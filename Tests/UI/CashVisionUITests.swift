@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 final class CashVisionUITests: XCTestCase {
     var app: XCUIApplication!
 
