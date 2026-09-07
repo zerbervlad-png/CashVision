@@ -1,7 +1,7 @@
 name: iOS Build & Test
 on:
   push:
-    branches: [main, develop, fix/build-errors]
+    branches: [main, develop, fix/comprehensive-audit]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -10,17 +10,21 @@ jobs:
   build-and-test:
     name: Build & Test (iOS)
     runs-on: macos-15
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
       - name: List available Xcode versions
         run: ls /Applications | grep Xcode
 
-      - name: Select Xcode
+      - name: Select Xcode 26
         run: |
-          sudo xcode-select -s /Applications/Xcode.app/contents/Developer
+          sudo xcode-select -s /Applications/Xcode_26.3.app/contents/Developer
           xcodebuild -version
+          swift --version
+
+      - name: Show available simulators
+        run: xcrun simctl list devices available | grep -E "iPhone (16|17|15)" | head -10
 
       - name: Install XcodeGen
         run: brew install xcodegen || brew upgrade xcodegen
@@ -39,15 +43,27 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee build_output.log
 
-      - name: Run tests
+      - name: Run unit tests
         run: |
           set -o pipefail
           xcodebuild test \
             -project CashVision.xcodeproj \
             -scheme CashVision \
+            -only-testing:CashVisionTests \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
             -derivedDataPath build/DerivedData \
-            CODE_SIGNING_ALLOWED=NO 2>&1 | tee test_output.log
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee unit_test_output.log
+
+      - name: Run UI tests
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project CashVision.xcodeproj \
+            -scheme CashVision \
+            -only-testing:CashVisionUITests \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.5' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee ui_test_output.log
 
       - name: Upload build logs
         if: always()
@@ -56,12 +72,12 @@ jobs:
           name: build-logs
           path: |
             build_output.log
-            test_output.log
-            build/DerivedData/Logs/Test
+            unit_test_output.log
+            ui_test_output.log
 
-      - name: Upload test artifacts
-        if: always()
+      - name: Upload .app artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: build/DerivedData/Logs/Test
+          name: CashVision-app
+          path: build/DerivedData/Build/Products/Debug-iphonesimulator/CashVision.app
