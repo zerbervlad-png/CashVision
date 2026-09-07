@@ -2,19 +2,19 @@ name: CashVision
 options:
   bundleIdPrefix: ai.cashvision
   deploymentTarget:
-    iOS: "26.0"
+    iOS: "17.0"
   createIntermediateGroups: true
   defaultConfig: Debug
 settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_LANG_VERSION: "6.0"
-    IPHONEOS_DEPLOYMENT_TARGET: "26.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
     DEVELOPMENT_TEAM: ""
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: NO
     SWIFT_STRICT_CONCURRENCY: minimal
-    ENABLE_MODULE_VERIFIER: YES
+    ENABLE_MODULE_VERIFIER: NO
     BUILD_LIBRARY_FOR_DISTRIBUTION: NO
     ALWAYS_SEARCH_USER_PATHS: NO
     CLANG_ENABLE_MODULES: YES
@@ -26,7 +26,7 @@ targets:
   CashVision:
     type: application
     platform: iOS
-    deploymentTarget: "26.0"
+    deploymentTarget: "17.0"
     sources:
       - path: CashVision
         excludes:
@@ -64,7 +64,7 @@ targets:
   CashVisionTests:
     type: bundle.unit-test
     platform: iOS
-    deploymentTarget: "26.0"
+    deploymentTarget: "17.0"
     sources:
       - path: Tests/Unit
     dependencies:
@@ -76,7 +76,7 @@ targets:
   CashVisionUITests:
     type: bundle.ui-testing
     platform: iOS
-    deploymentTarget: "26.0"
+    deploymentTarget: "17.0"
     sources:
       - path: Tests/UI
     dependencies:

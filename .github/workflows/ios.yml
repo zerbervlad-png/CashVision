@@ -1,7 +1,7 @@
 name: iOS Build & Test
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, fix/build-errors]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -14,14 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app/contents/Developer
+      - name: Select Xcode (auto)
+        run: sudo xcode-select -s "$(xcode-select -p)"
 
       - name: Show environment
         run: |
           xcodebuild -version
           swift --version
-          xcrun simctl list devices available | head -n 20
+          xcrun simctl list devices available | head -n 30
 
       - name: Install XcodeGen
         run: brew install xcodegen || brew upgrade xcodegen
@@ -31,22 +31,34 @@ jobs:
 
       - name: Build (Debug, Simulator)
         run: |
+          set -o pipefail
           xcodebuild build \
             -project CashVision.xcodeproj \
             -scheme CashVision \
             -configuration Debug \
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build/DerivedData \
-            CODE_SIGNING_ALLOWED=NO | xcpretty
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee build_output.log
 
       - name: Run tests
         run: |
+          set -o pipefail
           xcodebuild test \
             -project CashVision.xcodeproj \
             -scheme CashVision \
             -destination 'platform=iOS Simulator,name=iPhone 15' \
             -derivedDataPath build/DerivedData \
-            CODE_SIGNING_ALLOWED=NO | xcpretty
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee test_output.log
+
+      - name: Upload build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: |
+            build_output.log
+            test_output.log
+            build/DerivedData/Logs/Test
 
       - name: Upload test artifacts
         if: always()

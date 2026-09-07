@@ -41,7 +41,7 @@ struct SettingsView: View {
                 Section("О приложении") {
                     LabeledContent("Версия", value: appVersion)
                     LabeledContent("Сборка", value: buildNumber)
-                    LabeledContent("iOS", value: "26.0+")
+                    LabeledContent("iOS", value: "17.0+")
                     Link(destination: URL(string: "https://cashvision.ai")!) {
                         Label("Сайт CashVision", systemImage: "globe")
                     }

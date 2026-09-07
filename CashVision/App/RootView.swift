@@ -40,21 +40,29 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab("Проверить", systemImage: "viewfinder", value: AppTab.check) {
-                CheckView(container: container)
-            }
+            CheckView(container: container)
+                .tabItem {
+                    Label("Проверить", systemImage: "viewfinder")
+                }
+                .tag(AppTab.check)
 
-            Tab("Посчитать", systemImage: "plus.app", value: AppTab.count) {
-                CountView(container: container)
-            }
+            CountView(container: container)
+                .tabItem {
+                    Label("Посчитать", systemImage: "plus.app")
+                }
+                .tag(AppTab.count)
 
-            Tab("История", systemImage: "clock.arrow.circlepath", value: AppTab.history) {
-                HistoryView(viewModel: container.history)
-            }
+            HistoryView(viewModel: container.history)
+                .tabItem {
+                    Label("История", systemImage: "clock.arrow.circlepath")
+                }
+                .tag(AppTab.history)
 
-            Tab("Premium", systemImage: "crown", value: AppTab.premium) {
-                PremiumView(manager: container.subscription)
-            }
+            PremiumView(manager: container.subscription)
+                .tabItem {
+                    Label("Premium", systemImage: "crown")
+                }
+                .tag(AppTab.premium)
         }
         .onChange(of: selectedTab) { _, newValue in
             container.settings.lastUsedMode = newValue == .check ? "check" : newValue == .count ? "count" : "other"
