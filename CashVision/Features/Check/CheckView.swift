@@ -28,9 +28,13 @@ final class CheckViewModel {
         }
         if permissionState == .ready {
             await container.cameraService.configure()
-            startRecognitionPipeline()
-            container.cameraService.start()
-            container.analytics.track(.init(name: .cameraStarted))
+            if case .failed = container.cameraService.status {
+                permissionState = container.cameraService.status
+            } else {
+                startRecognitionPipeline()
+                container.cameraService.start()
+                container.analytics.track(.init(name: .cameraStarted))
+            }
         }
     }
 

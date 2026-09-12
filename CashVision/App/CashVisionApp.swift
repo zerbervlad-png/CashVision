@@ -7,6 +7,9 @@ struct CashVisionApp: App {
 
     init() {
         AppLogger.bootstrap()
+        if CommandLine.arguments.contains("-UITestsFresh") {
+            UserDefaults.standard.removeObject(forKey: "onboardingCompleted")
+        }
         _appContainer = State(initialValue: AppContainer())
     }
 
