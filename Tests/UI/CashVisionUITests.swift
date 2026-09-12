@@ -102,7 +102,7 @@ final class CashVisionUITests: XCTestCase {
         let triggered = triggerDemoRecognition(denomination: "5000 ₽")
         if triggered {
             let disclaimer = app.staticTexts.containing(
-                NSPredicate(format: "label CONTAINS %@", "гарантии")
+                NSPredicate(format: "label CONTAINS %@", "гаранти")
             ).firstMatch
             XCTAssertTrue(disclaimer.waitForExistence(timeout: 10))
         } else {
