@@ -8,18 +8,24 @@ struct CountView: View {
     @State private var manualAdjustDenomination: Denomination?
     @State private var manualAdjustCount: Int = 0
     @State private var showCompletionSheet = false
+    @State private var showDemoPicker = false
+    @State private var cameraFailed = false
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            CameraPreviewView(session: container.cameraService.captureSession)
-                .ignoresSafeArea()
-                .opacity(started ? 1 : 0.3)
-                .overlay(
-                    Color.black.opacity(started ? 0 : 0.4)
-                        .allowsHitTesting(false)
-                )
+            if cameraFailed {
+                countDemoContent
+            } else {
+                CameraPreviewView(session: container.cameraService.captureSession)
+                    .ignoresSafeArea()
+                    .opacity(started ? 1 : 0.3)
+                    .overlay(
+                        Color.black.opacity(started ? 0 : 0.4)
+                            .allowsHitTesting(false)
+                    )
+            }
 
             VStack {
                 if !started {
@@ -27,6 +33,24 @@ struct CountView: View {
                     startCard
                         .padding(.bottom, 60)
                 } else {
+                    HStack {
+                        Spacer()
+                        if DemoRecognitionHelper.isDemoAvailable {
+                            Button {
+                                showDemoPicker = true
+                            } label: {
+                                Label("Демо", systemImage: "wand.and.stars")
+                                    .font(.caption.bold())
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(.ultraThinMaterial, in: Capsule())
+                            }
+                            .tint(.white)
+                            .padding(.trailing, 16)
+                            .padding(.top, 8)
+                        }
+                        Spacer()
+                    }
                     Spacer()
                     countingSummary
                         .padding(.horizontal, 16)
@@ -41,6 +65,9 @@ struct CountView: View {
             }
             if container.cameraService.status == .ready || container.cameraService.status == .running {
                 await container.cameraService.configure()
+            }
+            if case .failed = container.cameraService.status {
+                cameraFailed = true
             }
         }
         .onDisappear {
@@ -73,11 +100,43 @@ struct CountView: View {
             .presentationDragIndicator(.visible)
             .presentationBackground(.regularMaterial)
         }
+        .sheet(isPresented: $showDemoPicker) {
+            DemoBanknotePickerSheet(onPick: { denomination in
+                showDemoPicker = false
+                let result = DemoRecognitionHelper.makeResult(for: denomination)
+                container.countingService.update(with: result)
+            })
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(.regularMaterial)
+        }
+    }
+
+    @ViewBuilder
+    private var countDemoContent: some View {
+        LinearGradient(
+            colors: [Color.accentColor.opacity(0.25), Color.black],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+        VStack {
+            if !started {
+                Spacer()
+                startCard
+                    .padding(.bottom, 60)
+            } else {
+                Spacer()
+                countingSummary
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 16)
+            }
+        }
     }
 
     private var startCard: some View {
         VStack(spacing: 20) {
-            Image(systemName: "plus.app.fill")
+            Image(systemName: cameraFailed ? "wand.and.stars" : "plus.app.fill")
                 .font(.system(size: 56, weight: .light))
                 .foregroundStyle(Color.accentColor)
                 .symbolEffect(.pulse, options: .repeating)
@@ -85,7 +144,9 @@ struct CountView: View {
             VStack(spacing: 8) {
                 Text("Режим пересчёта")
                     .font(.title.bold())
-                Text("Наведите камеру на банкноты по очереди.\nCashVision распознает и посчитает сумму.")
+                Text(cameraFailed
+                     ? "Камера недоступна на Simulator.\nИспользуйте «Демо» для симуляции распознавания."
+                     : "Наведите камеру на банкноты по очереди.\nCashVision распознает и посчитает сумму.")
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.secondary)
@@ -94,7 +155,9 @@ struct CountView: View {
 
             Button {
                 container.countingService.startCounting()
-                container.cameraService.start()
+                if !cameraFailed {
+                    container.cameraService.start()
+                }
                 withAnimation(.cashSpring) {
                     started = true
                 }

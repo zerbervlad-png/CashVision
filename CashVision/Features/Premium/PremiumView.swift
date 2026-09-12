@@ -25,10 +25,22 @@ struct PremiumView: View {
 
     private var headerSection: some View {
         VStack(spacing: 12) {
-            Image(systemName: "crown.fill")
-                .font(.system(size: 52, weight: .light))
-                .foregroundStyle(.yellow)
-                .symbolEffect(.pulse, options: .repeating)
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.accentColor, .yellow],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 88, height: 88)
+                    .shadow(color: Color.accentColor.opacity(0.4), radius: 12)
+                Image(systemName: "star.fill")
+                    .font(.system(size: 40, weight: .semibold))
+                    .foregroundStyle(.white)
+            }
+            .symbolEffect(.pulse, options: .repeating)
 
             VStack(spacing: 6) {
                 Text("CashVision Premium")
@@ -68,7 +80,10 @@ struct PremiumView: View {
                 .padding()
             } else {
                 ForEach(manager.products, id: \.id) { product in
-                    PlanCard(product: product) {
+                    PlanCard(
+                        product: product,
+                        isBestValue: product.id.contains("yearly")
+                    ) {
                         Task {
                             await manager.purchase(product)
                         }
@@ -160,27 +175,53 @@ struct FeatureRow: View {
 
 struct PlanCard: View {
     let product: Product
+    let isBestValue: Bool
     let action: () -> Void
+
+    init(product: Product, isBestValue: Bool = false, action: @escaping () -> Void) {
+        self.product = product
+        self.isBestValue = isBestValue
+        self.action = action
+    }
 
     var body: some View {
         Button(action: action) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(product.displayName)
-                        .font(.headline)
+                    HStack(spacing: 6) {
+                        Text(product.displayName)
+                            .font(.headline)
+                        if isBestValue {
+                            Text("Выгодно")
+                                .font(.caption2.bold())
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(Color.accentColor, in: Capsule())
+                        }
+                    }
                     Text(product.description)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .lineLimit(2)
                 }
                 Spacer()
                 Text(product.displayPrice)
                     .font(.headline)
             }
             .padding(16)
-            .background(Color.accentColor.opacity(0.08), in: RoundedRectangle(cornerRadius: 16))
+            .background(
+                isBestValue
+                    ? Color.accentColor.opacity(0.15)
+                    : Color.accentColor.opacity(0.08),
+                in: RoundedRectangle(cornerRadius: 16)
+            )
             .overlay(
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.accentColor.opacity(0.2), lineWidth: 1)
+                    .stroke(
+                        isBestValue ? Color.accentColor : Color.accentColor.opacity(0.2),
+                        lineWidth: isBestValue ? 2 : 1
+                    )
             )
         }
         .buttonStyle(.plain)

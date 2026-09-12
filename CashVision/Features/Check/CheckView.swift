@@ -12,6 +12,9 @@ final class CheckViewModel {
     private(set) var permissionState: CameraService.Status = .notDetermined
     private(set) var selectedFeature: SecurityFeature?
     private(set) var selectedBanknote: RecognizedBanknote?
+    private var frameDelegate: CameraFrameDelegate?
+    private var recognitionTask: Task<Void, Never>?
+    var showDemoPicker = false
 
     init(container: AppContainer) {
         self.container = container
@@ -25,9 +28,28 @@ final class CheckViewModel {
         }
         if permissionState == .ready {
             await container.cameraService.configure()
+            startRecognitionPipeline()
             container.cameraService.start()
             container.analytics.track(.init(name: .cameraStarted))
         }
+    }
+
+    func startRecognitionPipeline() {
+        let delegate = CameraFrameDelegate(recognition: container.recognitionService) { [weak self] result in
+            self?.updateRecognition(result)
+        }
+        frameDelegate = delegate
+        container.cameraService.setDelegate(delegate)
+    }
+
+    func simulateRecognition(for denomination: Denomination) {
+        let result = DemoRecognitionHelper.makeResult(for: denomination)
+        updateRecognition(result)
+        showDemoPicker = false
+    }
+
+    func resetRecognition() {
+        updateRecognition(nil)
     }
 
     func handlePermissionDenied() {
@@ -131,6 +153,8 @@ struct CheckView: View {
                 ProgressView("Запрашиваем доступ к камере…")
                     .tint(.white)
                     .foregroundStyle(.white)
+            case .failed:
+                demoContent
             default:
                 cameraContent
             }
@@ -146,11 +170,19 @@ struct CheckView: View {
         }
         .sheet(isPresented: $showSheet) {
             if let feature = viewModel.selectedFeature, let banknote = viewModel.selectedBanknote {
-                SecurityFeatureSheet(feature: feature, denomination: banknote.denomination)
+                SecurityFeatureSheet(feature: feature, denomination: banknote.denomination, officialSourceURL: banknote.definition?.officialSourceURL)
                     .presentationDetents([.medium, .large])
                     .presentationDragIndicator(.visible)
                     .presentationBackground(.regularMaterial)
             }
+        }
+        .sheet(isPresented: $viewModel.showDemoPicker) {
+            DemoBanknotePickerSheet(onPick: { denomination in
+                viewModel.simulateRecognition(for: denomination)
+            })
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+            .presentationBackground(.regularMaterial)
         }
     }
 
@@ -184,6 +216,99 @@ struct CheckView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 24)
             .animation(.cashSpring, value: viewModel.status)
+
+            if DemoRecognitionHelper.isDemoAvailable {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            viewModel.showDemoPicker = true
+                        } label: {
+                            Label("Демо", systemImage: "wand.and.stars")
+                                .font(.caption.bold())
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(.ultraThinMaterial, in: Capsule())
+                        }
+                        .tint(.white)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    Spacer()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var demoContent: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color.accentColor.opacity(0.25), Color.black],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                topHint
+
+                Spacer()
+
+                VStack(spacing: 18) {
+                    Image(systemName: "wand.and.stars")
+                        .font(.system(size: 56, weight: .light))
+                        .foregroundStyle(Color.accentColor)
+                        .symbolEffect(.pulse, options: .repeating)
+
+                    VStack(spacing: 8) {
+                        Text("Демо-режим")
+                            .font(.title2.bold())
+                            .foregroundStyle(.white)
+                        Text("Камера недоступна на Simulator.\nВыберите номинал банкноты, чтобы увидеть защитные признаки и проверку подлинности.")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.white.opacity(0.7))
+                            .padding(.horizontal, 24)
+                    }
+
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                        ForEach(DemoRecognitionHelper.availableDenominations) { denom in
+                            Button {
+                                viewModel.simulateRecognition(for: denom)
+                            } label: {
+                                Text(denom.formatted)
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 14)
+                                    .background(Color.accentColor.opacity(0.2), in: RoundedRectangle(cornerRadius: 12))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.accentColor.opacity(0.4), lineWidth: 1)
+                                    )
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+
+                if !viewModel.recognized.isEmpty {
+                    statusPanel
+                    disclaimerBanner
+                        .padding(.bottom, 8)
+                }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 24)
+
+            BanknoteOverlayView(recognized: viewModel.recognized) { banknote, feature in
+                viewModel.selectFeature(feature, on: banknote)
+                showSheet = true
+            }
+            .allowsHitTesting(!viewModel.recognized.isEmpty)
         }
     }
 
@@ -279,5 +404,52 @@ struct CameraPermissionView: View {
         }
         .foregroundStyle(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct DemoBanknotePickerSheet: View {
+    let onPick: (Denomination) -> Void
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 16) {
+                    Image(systemName: "wand.and.stars")
+                        .font(.system(size: 40, weight: .light))
+                        .foregroundStyle(Color.accentColor)
+
+                    Text("Демо-распознавание")
+                        .font(.title3.bold())
+                    Text("Выберите номинал банкноты для симуляции распознавания. Откроется карточка с защитными признаками Банка России.")
+                        .font(.subheadline)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 16)
+
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                        ForEach(DemoRecognitionHelper.availableDenominations) { denom in
+                            Button {
+                                onPick(denom)
+                            } label: {
+                                Text(denom.formatted)
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 18)
+                                    .background(Color.accentColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 14))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
+                                    )
+                                    .foregroundStyle(.primary)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                }
+                .padding(.vertical, 20)
+            }
+            .navigationTitle("Демо-режим")
+            .navigationBarTitleDisplayMode(.inline)
+        }
     }
 }

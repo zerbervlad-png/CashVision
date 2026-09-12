@@ -1,0 +1,117 @@
+{
+  "identifier" : "4F2A8B6C-9D7E-4A1B-B3C5-DE6F8A1B2C3D",
+  "type" : "subscriptions",
+  "version" : 3,
+  "subscriptionGroups" : [
+    {
+      "id" : "5A1B2C3D-4E5F-6A7B-8C9D-0E1F2A3B4C5D",
+      "localizations" : [
+        {
+          "description" : "Premium-подписка CashVision",
+          "displayName" : "CashVision Premium",
+          "locale" : "ru_RU"
+        }
+      ],
+      "name" : "CashVision Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "familySharable" : false,
+          "groupLevel" : 1,
+          "introductoryOffer" : {
+            "internalDescription" : "7 days free trial",
+            "internalDisplayPrice" : "0,00 ₽",
+            "internalPeriod" : "7 days",
+            "internalPeriodUnit" : "day",
+            "internalPeriodUnits" : 7,
+            "mode" : "free_trial",
+            "name" : "7 дней бесплатно",
+            "paymentMode" : "free",
+            "referralOffer" : false,
+            "subscriptionPeriod" : "7 days"
+          },
+          "localizations" : [
+            {
+              "description" : "Помесячная подписка. Безлимитная проверка банкнот, расширенный пересчёт, история операций.",
+              "displayName" : "Premium — Месяц",
+              "locale" : "ru_RU"
+            }
+          ],
+          "productID" : "cashvision.premium.monthly",
+          "recurringSubscriptionPeriod" : "1 month",
+          "referenceName" : "CashVision Premium Monthly",
+          "subscriptionPeriodUnit" : "month",
+          "subscriptionPeriodUnits" : 1,
+          "type" : "RecurringSubscription",
+          "version" : 2
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "familySharable" : false,
+          "groupLevel" : 1,
+          "introductoryOffer" : {
+            "internalDescription" : "7 days free trial",
+            "internalDisplayPrice" : "0,00 ₽",
+            "internalPeriod" : "7 days",
+            "internalPeriodUnit" : "day",
+            "internalPeriodUnits" : 7,
+            "mode" : "free_trial",
+            "name" : "7 дней бесплатно",
+            "paymentMode" : "free",
+            "referralOffer" : false,
+            "subscriptionPeriod" : "7 days"
+          },
+          "localizations" : [
+            {
+              "description" : "Квартальная подписка — экономия 15%. Безлимитная проверка и расширенный пересчёт.",
+              "displayName" : "Premium — Квартал",
+              "locale" : "ru_RU"
+            }
+          ],
+          "productID" : "cashvision.premium.quarterly",
+          "recurringSubscriptionPeriod" : "3 months",
+          "referenceName" : "CashVision Premium Quarterly",
+          "subscriptionPeriodUnit" : "month",
+          "subscriptionPeriodUnits" : 3,
+          "type" : "RecurringSubscription",
+          "version" : 2
+        },
+        {
+          "adHocOffers" : [],
+          "codeOffers" : [],
+          "familySharable" : false,
+          "groupLevel" : 1,
+          "introductoryOffer" : {
+            "internalDescription" : "7 days free trial",
+            "internalDisplayPrice" : "0,00 ₽",
+            "internalPeriod" : "7 days",
+            "internalPeriodUnit" : "day",
+            "internalPeriodUnits" : 7,
+            "mode" : "free_trial",
+            "name" : "7 дней бесплатно",
+            "paymentMode" : "free",
+            "referralOffer" : false,
+            "subscriptionPeriod" : "7 days"
+          },
+          "localizations" : [
+            {
+              "description" : "Годовая подписка — максимальная выгода. Безлимитная проверка, расширенный пересчёт, история и экспорт.",
+              "displayName" : "Premium — Год",
+              "locale" : "ru_RU"
+            }
+          ],
+          "productID" : "cashvision.premium.yearly",
+          "recurringSubscriptionPeriod" : "1 year",
+          "referenceName" : "CashVision Premium Yearly",
+          "subscriptionPeriodUnit" : "year",
+          "subscriptionPeriodUnits" : 1,
+          "type" : "RecurringSubscription",
+          "version" : 2
+        }
+      ],
+      "subscriptionsWithLockedPrices" : []
+    }
+  ]
+}

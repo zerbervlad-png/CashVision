@@ -12,6 +12,7 @@ struct AppConfiguration {
 
     static let defaultProductIDs: Set<String> = [
         "cashvision.premium.monthly",
+        "cashvision.premium.quarterly",
         "cashvision.premium.yearly"
     ]
 

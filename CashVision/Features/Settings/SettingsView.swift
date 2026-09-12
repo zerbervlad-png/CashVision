@@ -61,6 +61,15 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Источник данных о банкнотах") {
+                    Text("Описания защитных признаков банкнот Банка России основаны на официальных материалах cbr.ru. Приложение не подключается к API Банка России — официального публичного API для проверки подлинности не существует. Данные о признаках загружаются локально из встроенного набора и могут обновляться через сервер CashVision.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Link(destination: URL(string: "https://www.cbr.ru/cash_circulation/banknotes/")!) {
+                        Label("Открыть cbr.ru — банкноты", systemImage: "arrow.up.right.square")
+                    }
+                }
+
                 Section {
                     Button(role: .destructive) {
                         settings.reset()

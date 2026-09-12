@@ -12,6 +12,7 @@ final class BanknoteRecognitionService {
     private let classifier: BanknoteClassifierModel
     private let qualityModel: BanknoteQualityModel
     private let frameThrottler: FrameThrottler
+    private let banknoteRepository: BanknoteRepositoryProtocol?
 
     private(set) var lastResult: RecognitionResult?
     private(set) var isProcessing = false
@@ -20,11 +21,13 @@ final class BanknoteRecognitionService {
         detector: BanknoteDetectorModel = StubBanknoteDetector(),
         classifier: BanknoteClassifierModel = StubBanknoteClassifier(),
         qualityModel: BanknoteQualityModel = StubBanknoteQualityModel(),
+        banknoteRepository: BanknoteRepositoryProtocol? = nil,
         inferenceFPS: Double = 12
     ) {
         self.detector = detector
         self.classifier = classifier
         self.qualityModel = qualityModel
+        self.banknoteRepository = banknoteRepository
         self.frameThrottler = FrameThrottler(targetFPS: inferenceFPS)
     }
 
@@ -40,15 +43,20 @@ final class BanknoteRecognitionService {
             var recognized: [RecognizedBanknote] = []
             for detection in detections where detection.confidence >= 0.4 {
                 let classification = try? await classifier.classify(buffer: buffer)
+                let denomination = classification?.denomination ?? Denomination(currency: .rub, value: 0)
+                let definition = banknoteRepository != nil
+                    ? try? await banknoteRepository!.find(denomination: denomination)
+                    : nil
                 recognized.append(
                     RecognizedBanknote(
-                        denomination: classification?.denomination ?? Denomination(currency: .rub, value: 0),
+                        denomination: denomination,
                         side: classification?.side ?? .front,
                         orientation: classification?.orientation ?? .up,
                         boundingBox: detection.boundingBox,
                         confidence: min(detection.confidence, classification?.confidence ?? 1),
                         qualityScore: quality.overallScore,
-                        isPartial: detection.boundingBox.width < 0.4 || detection.boundingBox.height < 0.4
+                        isPartial: detection.boundingBox.width < 0.4 || detection.boundingBox.height < 0.4,
+                        definition: definition
                     )
                 )
             }

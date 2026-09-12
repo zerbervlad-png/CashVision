@@ -3,7 +3,15 @@ import SwiftUI
 struct SecurityFeatureSheet: View {
     let feature: SecurityFeature
     let denomination: Denomination
+    let officialSourceURL: URL?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
+
+    init(feature: SecurityFeature, denomination: Denomination, officialSourceURL: URL? = nil) {
+        self.feature = feature
+        self.denomination = denomination
+        self.officialSourceURL = officialSourceURL
+    }
 
     var body: some View {
         NavigationStack {
@@ -52,6 +60,22 @@ struct SecurityFeatureSheet: View {
                                 .padding(.vertical, 5)
                                 .background(.quaternary, in: Capsule())
                         }
+                    }
+
+                    if let url = officialSourceURL {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Источник данных")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .textCase(.uppercase)
+                            Button {
+                                openURL(url)
+                            } label: {
+                                Label("Банк России — cbr.ru", systemImage: "building.columns")
+                                    .font(.subheadline)
+                            }
+                        }
+                        .padding(.vertical, 8)
                     }
 
                     DisclaimerBanner(text: VerificationStatus.notGuaranteeDisclaimer)

@@ -38,7 +38,7 @@ final class AppContainer {
         self.settings = SettingsStore()
         self.analytics = AnalyticsService()
         self.cameraService = CameraService()
-        self.recognitionService = BanknoteRecognitionService()
+        self.recognitionService = BanknoteRecognitionService(banknoteRepository: banknoteRepository)
         self.countingService = CountingService(recognition: recognitionService)
         self.apiClient = APIClient(baseURL: config.apiBaseURL)
         self.security = SecurityService()

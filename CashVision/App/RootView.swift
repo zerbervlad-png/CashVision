@@ -60,7 +60,7 @@ struct MainTabView: View {
 
             PremiumView(manager: container.subscription)
                 .tabItem {
-                    Label("Premium", systemImage: "crown")
+                    Label("Premium", systemImage: "star.fill")
                 }
                 .tag(AppTab.premium)
         }
