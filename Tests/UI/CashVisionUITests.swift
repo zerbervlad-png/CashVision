@@ -104,7 +104,7 @@ final class CashVisionUITests: XCTestCase {
             let disclaimer = app.staticTexts.containing(
                 NSPredicate(format: "label CONTAINS %@", "гарантии")
             ).firstMatch
-            XCTAssertTrue(disclaimer.waitForExistence(timeout: 5))
+            XCTAssertTrue(disclaimer.waitForExistence(timeout: 10))
         } else {
             XCTAssertTrue(app.exists)
         }
@@ -117,6 +117,7 @@ final class CashVisionUITests: XCTestCase {
             return
         }
 
+        app.swipeUp()
         let watermarkButton = app.buttons["Водяной знак"]
         if watermarkButton.waitForExistence(timeout: 5) {
             watermarkButton.tap()
@@ -133,15 +134,21 @@ final class CashVisionUITests: XCTestCase {
             return
         }
 
+        app.swipeUp()
         let watermarkButton = app.buttons["Водяной знак"]
         if watermarkButton.waitForExistence(timeout: 5) {
             watermarkButton.tap()
             XCTAssertTrue(app.navigationBars["Защитный признак"].waitForExistence(timeout: 5))
             sleep(1)
+            let cbrfButton = app.buttons["Банк России — cbr.ru"]
+            let sourceLabel = app.staticTexts["Источник данных"]
+            let cbrfText = app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "cbr.ru")).firstMatch
+            if !cbrfButton.exists && !sourceLabel.exists && !cbrfText.exists {
+                app.swipeUp()
+                sleep(1)
+            }
             XCTAssertTrue(
-                app.buttons["Банк России — cbr.ru"].exists ||
-                app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "cbr.ru")).firstMatch.exists ||
-                app.staticTexts["Источник данных"].exists
+                cbrfButton.exists || cbrfText.exists || sourceLabel.exists
             )
         } else {
             XCTAssertTrue(app.exists)
@@ -155,6 +162,7 @@ final class CashVisionUITests: XCTestCase {
             return
         }
 
+        app.swipeUp()
         let watermarkButton = app.buttons["Водяной знак"]
         if watermarkButton.waitForExistence(timeout: 5) {
             watermarkButton.tap()

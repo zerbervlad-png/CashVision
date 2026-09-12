@@ -93,8 +93,10 @@ struct SecurityFeatureSheet: View {
         }
     }
 
-    private var icon: String {
-        switch feature.type {
+    private var icon: String { Self.icon(for: feature.type) }
+
+    static func icon(for type: SecurityCheckType) -> String {
+        switch type {
         case .watermark: return "drop.fill"
         case .securityThread: return "minus.dash"
         case .microperforation: return "circle.dashed"

@@ -98,6 +98,7 @@ struct FeaturePin: View {
                 y: parentFrame.height * feature.position.y
             )
             .accessibilityLabel(feature.title)
+            .accessibilityIdentifier("feature_\(feature.title)")
             .accessibilityAddTraits(.isButton)
     }
 }

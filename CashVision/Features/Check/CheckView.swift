@@ -254,65 +254,100 @@ struct CheckView: View {
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 24) {
+            VStack(spacing: 16) {
                 topHint
 
-                Spacer()
+                ScrollView {
+                    VStack(spacing: 18) {
+                        Image(systemName: "wand.and.stars")
+                            .font(.system(size: 56, weight: .light))
+                            .foregroundStyle(Color.accentColor)
+                            .symbolEffect(.pulse, options: .repeating)
 
-                VStack(spacing: 18) {
-                    Image(systemName: "wand.and.stars")
-                        .font(.system(size: 56, weight: .light))
-                        .foregroundStyle(Color.accentColor)
-                        .symbolEffect(.pulse, options: .repeating)
+                        VStack(spacing: 8) {
+                            Text("Демо-режим")
+                                .font(.title2.bold())
+                                .foregroundStyle(.white)
+                            Text("Камера недоступна на Simulator.\nВыберите номинал банкноты, чтобы увидеть защитные признаки и проверку подлинности.")
+                                .font(.subheadline)
+                                .multilineTextAlignment(.center)
+                                .foregroundStyle(.white.opacity(0.7))
+                                .padding(.horizontal, 24)
+                        }
 
-                    VStack(spacing: 8) {
-                        Text("Демо-режим")
-                            .font(.title2.bold())
-                            .foregroundStyle(.white)
-                        Text("Камера недоступна на Simulator.\nВыберите номинал банкноты, чтобы увидеть защитные признаки и проверку подлинности.")
-                            .font(.subheadline)
-                            .multilineTextAlignment(.center)
-                            .foregroundStyle(.white.opacity(0.7))
-                            .padding(.horizontal, 24)
-                    }
-
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                        ForEach(DemoRecognitionHelper.availableDenominations) { denom in
-                            Button {
-                                viewModel.simulateRecognition(for: denom)
-                            } label: {
-                                Text(denom.formatted)
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 14)
-                                    .background(Color.accentColor.opacity(0.2), in: RoundedRectangle(cornerRadius: 12))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .stroke(Color.accentColor.opacity(0.4), lineWidth: 1)
-                                    )
-                                    .foregroundStyle(.white)
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                            ForEach(DemoRecognitionHelper.availableDenominations) { denom in
+                                Button {
+                                    viewModel.simulateRecognition(for: denom)
+                                } label: {
+                                    Text(denom.formatted)
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 14)
+                                        .background(Color.accentColor.opacity(0.2), in: RoundedRectangle(cornerRadius: 12))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(Color.accentColor.opacity(0.4), lineWidth: 1)
+                                        )
+                                        .foregroundStyle(.white)
+                                }
                             }
                         }
+                        .padding(.horizontal, 16)
+
+                        if !viewModel.recognized.isEmpty {
+                            statusPanel
+                        }
+
+                        if !viewModel.recognized.isEmpty,
+                           let banknote = viewModel.recognized.first,
+                           let definition = banknote.definition {
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Защитные признаки")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .textCase(.uppercase)
+                                    .padding(.horizontal, 4)
+
+                                ForEach(definition.securityFeatures) { feature in
+                                    Button {
+                                        viewModel.selectFeature(feature, on: banknote)
+                                        showSheet = true
+                                    } label: {
+                                        HStack(spacing: 12) {
+                                            Image(systemName: SecurityFeatureSheet.icon(for: feature.type))
+                                                .font(.body)
+                                                .foregroundStyle(Color.accentColor)
+                                                .frame(width: 32, height: 32)
+                                                .background(Color.accentColor.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                                            Text(feature.title)
+                                                .font(.body)
+                                            Spacer()
+                                            Image(systemName: "chevron.right")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        .padding(.vertical, 10)
+                                        .padding(.horizontal, 14)
+                                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                                    }
+                                    .foregroundStyle(.white)
+                                }
+                            }
+                            .padding(.top, 8)
+                        }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
                 }
 
                 if !viewModel.recognized.isEmpty {
-                    statusPanel
                     disclaimerBanner
+                        .accessibilityIdentifier("checkDisclaimer")
                         .padding(.bottom, 8)
                 }
-
-                Spacer()
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 24)
-
-            BanknoteOverlayView(recognized: viewModel.recognized) { banknote, feature in
-                viewModel.selectFeature(feature, on: banknote)
-                showSheet = true
-            }
-            .allowsHitTesting(!viewModel.recognized.isEmpty)
         }
     }
 
