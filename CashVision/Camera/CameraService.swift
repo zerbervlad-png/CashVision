@@ -57,10 +57,10 @@ final class CameraService: NSObject {
 
     func configure() async {
         guard status == .ready || status == .running else { return }
-        let session = self.session
+        let session = UncheckedSendable(value: self.session)
         let result: ConfigureResult = await withCheckedContinuation { (continuation: CheckedContinuation<ConfigureResult, Never>) in
             videoQueue.async {
-                let res = Self.configureSession(session)
+                let res = Self.configureSession(session.value)
                 continuation.resume(returning: res)
             }
         }
@@ -77,31 +77,33 @@ final class CameraService: NSObject {
     }
 
     func start() {
-        let session = self.session
+        let session = UncheckedSendable(value: self.session)
         let queue = self.videoQueue
         queue.async { [weak self] in
-            guard session.isRunning == false else { return }
-            session.startRunning()
+            guard session.value.isRunning == false else { return }
+            session.value.startRunning()
             Task { @MainActor [weak self] in self?.status = .running }
         }
     }
 
     func stop() {
-        let session = self.session
+        let session = UncheckedSendable(value: self.session)
         let queue = self.videoQueue
         queue.async {
-            if session.isRunning {
-                session.stopRunning()
+            if session.value.isRunning {
+                session.value.stopRunning()
                 AppLogger.camera.notice("Camera session stopped")
             }
         }
     }
 
     func setDelegate(_ delegate: AVCaptureVideoDataOutputSampleBufferDelegate) {
-        guard let output = frameOutput else { return }
+        guard let frameOutput else { return }
+        let output = UncheckedSendable(value: frameOutput)
+        let delegate = UncheckedSendable(value: delegate)
         let queue = self.videoQueue
         videoQueue.async {
-            output.setSampleBufferDelegate(delegate, queue: queue)
+            output.value.setSampleBufferDelegate(delegate.value, queue: queue)
         }
     }
 
@@ -124,6 +126,10 @@ final class CameraService: NSObject {
 
     func toggleTorch() async {
         await setTorch(enabled: !isTorchOn)
+    }
+
+    private struct UncheckedSendable<Value>: @unchecked Sendable {
+        let value: Value
     }
 
     private enum ConfigureResult: @unchecked Sendable {
