@@ -12,8 +12,8 @@ final class CheckViewModel {
     private(set) var permissionState: CameraService.Status = .notDetermined
     private(set) var selectedFeature: SecurityFeature?
     private(set) var selectedBanknote: RecognizedBanknote?
-    private var frameDelegate: CameraFrameDelegate?
-    private var recognitionTask: Task<Void, Never>?
+    @ObservationIgnored private var frameDelegate: CameraFrameDelegate?
+    @ObservationIgnored private var recognitionTask: Task<Void, Never>?
     var showDemoPicker = false
 
     init(container: AppContainer) {

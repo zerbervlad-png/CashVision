@@ -75,9 +75,7 @@ if (( ${#ERRORS[@]} > 0 )); then
 fi
 
 log "7/9 Генерация проекта…"
-if [[ ! -f CashVision.xcodeproj/project.pbxproj ]]; then
-    xcodegen generate
-fi
+xcodegen generate
 
 log "8/9 Сборка приложения…"
 SIM_ID="$(xcrun simctl list devices available | grep -E 'iPhone (15|14|SE)' | head -n1 | grep -oE '[A-F0-9-]{36}' || true)"
