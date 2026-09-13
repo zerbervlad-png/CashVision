@@ -17,7 +17,7 @@ struct CashVisionApp: App {
         WindowGroup {
             RootView(container: appContainer)
                 .tint(.accentColor)
-                .preferredColorScheme(nil)
+                .preferredColorScheme(appContainer.settings.preferredColorScheme.colorSchemeValue)
                 .environment(appContainer.subscription)
                 .environment(appContainer.history)
                 .environment(appContainer.settings)

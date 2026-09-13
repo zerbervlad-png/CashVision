@@ -41,7 +41,6 @@ struct OnboardingFlow: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
 
             VStack(spacing: 12) {
                 Button {

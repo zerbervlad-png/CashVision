@@ -53,6 +53,8 @@ final class SettingsStore {
         UserDefaults.standard.removeObject(forKey: "saveResultsToPhotos")
         UserDefaults.standard.removeObject(forKey: "hapticsEnabled")
         UserDefaults.standard.removeObject(forKey: "autoTorch")
+        UserDefaults.standard.removeObject(forKey: "allowAnalytics")
+        UserDefaults.standard.removeObject(forKey: "lastMode")
     }
 }
 
@@ -66,6 +68,14 @@ enum AppColorScheme: Int, CaseIterable {
         case .system: return "Системная"
         case .light: return "Светлая"
         case .dark: return "Тёмная"
+        }
+    }
+
+    var colorSchemeValue: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
         }
     }
 }

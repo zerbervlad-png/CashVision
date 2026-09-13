@@ -16,7 +16,7 @@ final class SubscriptionManager {
     let productIDs: Set<String>
     private(set) var products: [Product] = []
     private(set) var status: Status = .unknown
-    private nonisolated(unsafe) var transactionListener: Task<Void, Never>?
+    private nonisolated var transactionListener: Task<Void, Never>?
 
     init(productIDs: Set<String>) {
         self.productIDs = productIDs

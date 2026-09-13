@@ -1,8 +1,5 @@
 import Foundation
 import AVFoundation
-import CoreImage
-import Vision
-import CoreML
 import Observation
 
 @MainActor

@@ -1,6 +1,6 @@
 import Foundation
 @preconcurrency import AVFoundation
-import CoreVideo
+@preconcurrency import CoreVideo
 
 @MainActor
 final class CameraFrameDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
@@ -19,7 +19,7 @@ final class CameraFrameDelegate: NSObject, AVCaptureVideoDataOutputSampleBufferD
         from connection: AVCaptureConnection
     ) {
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
-        Task { @MainActor [weak self] in
+        Task { @MainActor [weak self, pixelBuffer] in
             guard let self else { return }
             await self.recognition.processFrame(pixelBuffer)
             let now = Date()

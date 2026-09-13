@@ -26,9 +26,11 @@ final class AppContainer {
         self.logger = AppLogger.self
 
         let localProvider = LocalBanknoteDataProvider()
+        let apiClient = APIClient(baseURL: config.apiBaseURL)
+        self.apiClient = apiClient
         self.banknoteDataProvider = CompositeBanknoteDataProvider(
             local: localProvider,
-            remote: RemoteBanknoteDataProvider(apiClient: APIClient(baseURL: config.apiBaseURL))
+            remote: RemoteBanknoteDataProvider(apiClient: apiClient)
         )
         self.banknoteRepository = BanknoteRepository(provider: banknoteDataProvider)
         self.serialVerificationProvider = CompositeSerialVerificationProvider()
@@ -40,7 +42,6 @@ final class AppContainer {
         self.cameraService = CameraService()
         self.recognitionService = BanknoteRecognitionService(banknoteRepository: banknoteRepository)
         self.countingService = CountingService(recognition: recognitionService)
-        self.apiClient = APIClient(baseURL: config.apiBaseURL)
         self.security = SecurityService()
     }
 }

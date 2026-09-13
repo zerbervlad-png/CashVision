@@ -1,6 +1,5 @@
 import Foundation
-import CoreML
-import Vision
+import CoreVideo
 
 @MainActor
 protocol BanknoteDetectorModel {

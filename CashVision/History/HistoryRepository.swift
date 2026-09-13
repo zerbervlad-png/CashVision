@@ -1,10 +1,8 @@
 import Foundation
-import SwiftData
 import Observation
 
-@Model
-final class HistoryEntry {
-    @Attribute(.unique) var id: UUID
+final class HistoryEntry: Identifiable {
+    let id: UUID
     var date: Date
     var totalAmount: Int
     var totalCount: Int

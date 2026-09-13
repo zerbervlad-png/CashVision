@@ -24,11 +24,6 @@ final class CameraService: NSObject {
     private var isConfigured = false
 
     var captureSession: AVCaptureSession { session }
-    var previewLayer: AVCaptureVideoPreviewLayer {
-        let layer = AVCaptureVideoPreviewLayer(session: session)
-        layer.videoGravity = .resizeAspectFill
-        return layer
-    }
 
     override init() {
         super.init()
@@ -131,7 +126,7 @@ final class CameraService: NSObject {
         await setTorch(enabled: !isTorchOn)
     }
 
-    private enum ConfigureResult {
+    private enum ConfigureResult: @unchecked Sendable {
         case success(AVCaptureVideoDataOutput)
         case failure(String)
         case noCamera
