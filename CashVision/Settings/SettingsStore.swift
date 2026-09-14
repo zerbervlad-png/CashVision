@@ -22,11 +22,6 @@ final class SettingsStore {
         set { UserDefaults.standard.set(newValue, forKey: "reduceMotion") }
     }
 
-    var saveResultsToPhotos: Bool {
-        get { UserDefaults.standard.bool(forKey: "saveResultsToPhotos") }
-        set { UserDefaults.standard.set(newValue, forKey: "saveResultsToPhotos") }
-    }
-
     var allowAnalytics: Bool {
         get { UserDefaults.standard.object(forKey: "allowAnalytics") as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: "allowAnalytics") }
@@ -50,7 +45,6 @@ final class SettingsStore {
     func reset() {
         UserDefaults.standard.removeObject(forKey: "colorScheme")
         UserDefaults.standard.removeObject(forKey: "reduceMotion")
-        UserDefaults.standard.removeObject(forKey: "saveResultsToPhotos")
         UserDefaults.standard.removeObject(forKey: "hapticsEnabled")
         UserDefaults.standard.removeObject(forKey: "autoTorch")
         UserDefaults.standard.removeObject(forKey: "allowAnalytics")

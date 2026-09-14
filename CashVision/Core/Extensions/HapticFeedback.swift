@@ -18,9 +18,11 @@ enum HapticFeedback {
     static func denominationPattern(rank: Int) {
         guard UserDefaults.standard.object(forKey: "hapticsEnabled") as? Bool ?? true else { return }
         let generator = UIImpactFeedbackGenerator(style: .medium)
-        for _ in 0..<max(1, min(rank, 5)) {
-            generator.impactOccurred()
-            Thread.sleep(forTimeInterval: 0.12)
+        Task {
+            for _ in 0..<max(1, min(rank, 5)) {
+                generator.impactOccurred()
+                try? await Task.sleep(for: .milliseconds(120))
+            }
         }
     }
 }

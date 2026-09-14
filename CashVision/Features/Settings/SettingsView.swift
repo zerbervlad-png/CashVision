@@ -38,10 +38,6 @@ struct SettingsView: View {
                         get: { settings.allowAnalytics },
                         set: { settings.allowAnalytics = $0 }
                     ))
-                    Toggle("Сохранять результаты в Фото", isOn: Binding(
-                        get: { settings.saveResultsToPhotos },
-                        set: { settings.saveResultsToPhotos = $0 }
-                    ))
                     NavigationLink {
                         PrivacyPolicyView()
                     } label: {

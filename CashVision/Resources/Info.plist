@@ -24,8 +24,6 @@
     <true/>
     <key>NSCameraUsageDescription</key>
     <string>Камера нужна для распознавания банкнот и проверки защитных признаков. Изображения не покидают устройство.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>Доступ к фото требуется только при сохранении снимков результатов по вашему запросу.</string>
     <key>ITSAppUsesNonExemptEncryption</key>
     <false/>
     <key>UILaunchScreen</key>

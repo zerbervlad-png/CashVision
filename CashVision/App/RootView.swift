@@ -5,6 +5,7 @@ struct RootView: View {
     let container: AppContainer
     @State private var showOnboarding: Bool
     @State private var selectedTab: AppTab = .check
+    @Environment(\.scenePhase) private var scenePhase
 
     init(container: AppContainer) {
         self.container = container
@@ -27,6 +28,16 @@ struct RootView: View {
             }
         }
         .animation(.cashSpring, value: showOnboarding)
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .background:
+                container.cameraService.handleAppBackground()
+            case .active:
+                container.cameraService.handleAppForeground()
+            default:
+                break
+            }
+        }
     }
 }
 

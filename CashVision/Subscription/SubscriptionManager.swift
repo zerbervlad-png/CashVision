@@ -46,13 +46,21 @@ final class SubscriptionManager {
             let result = try await product.purchase()
             switch result {
             case .success(let verification):
-                let transaction = try checkVerified(verification)
-                await refreshStatus()
-                await transaction.finish()
+                do {
+                    let transaction = try checkVerified(verification)
+                    await refreshStatus()
+                    await transaction.finish()
+                } catch {
+                    if case .unverified(let transaction, _) = verification {
+                        await transaction.finish()
+                    }
+                    throw error
+                }
             case .userCancelled:
                 AppLogger.subscription.notice("Purchase cancelled")
             case .pending:
                 AppLogger.subscription.notice("Purchase pending")
+                self.status = .error("Покупка ожидает подтверждения (например, родительского одобрения). Статус обновится автоматически.")
             @unknown default:
                 break
             }

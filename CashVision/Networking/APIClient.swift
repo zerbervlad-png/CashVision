@@ -67,6 +67,7 @@ final class APIClient: Sendable {
         var attempt = 0
         var lastError: Error?
         while attempt <= maxRetries {
+            try Task.checkCancellation()
             attempt += 1
             guard await rateLimiter.tryAcquire() else {
                 AppLogger.network.notice("Rate limit exceeded for \(path)")
@@ -92,7 +93,7 @@ final class APIClient: Sendable {
                 }
                 if http.statusCode == 429 || http.statusCode >= 500 {
                     let delay = pow(2.0, Double(attempt))
-                    try? await Task.sleep(nanoseconds: UInt64(delay * 200_000_000))
+                    try await Task.sleep(nanoseconds: UInt64(delay * 200_000_000))
                     lastError = AppError.serverError(http.statusCode)
                     continue
                 }
@@ -100,6 +101,10 @@ final class APIClient: Sendable {
                 throw AppError.serverError(http.statusCode)
             } catch let error as AppError {
                 throw error
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch let error as URLError where error.code == .cancelled {
+                throw CancellationError()
             } catch {
                 AppLogger.network.error("Network error \(path): \(error.localizedDescription)")
                 lastError = AppError.networkUnavailable

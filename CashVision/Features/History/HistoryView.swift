@@ -36,6 +36,7 @@ struct HistoryView: View {
                     } label: {
                         Image(systemName: "gearshape")
                     }
+                    .accessibilityLabel("Настройки")
                 }
                 if !viewModel.entries.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {

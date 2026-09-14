@@ -29,7 +29,7 @@ final class BanknoteRecognitionService {
     }
 
     func processFrame(_ buffer: CVPixelBuffer) async {
-        guard frameThrottler.shouldProcess(), !isProcessing else { return }
+        guard !isProcessing, frameThrottler.shouldProcess() else { return }
         isProcessing = true
         defer { isProcessing = false }
 
@@ -41,9 +41,7 @@ final class BanknoteRecognitionService {
             for detection in detections where detection.confidence >= 0.4 {
                 let classification = try? await classifier.classify(buffer: buffer)
                 let denomination = classification?.denomination ?? Denomination(currency: .rub, value: 0)
-                let definition = banknoteRepository != nil
-                    ? try? await banknoteRepository!.find(denomination: denomination)
-                    : nil
+                let definition = try? await banknoteRepository?.find(denomination: denomination)
                 recognized.append(
                     RecognizedBanknote(
                         denomination: denomination,

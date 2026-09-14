@@ -494,12 +494,11 @@ final class CashVisionUITests: XCTestCase {
         )
     }
 
-    func testSC030_settingsShowsSaveToPhotosToggle() {
+    func testSC030_settingsSaveToPhotosToggleRemoved() {
         navigateToSettings()
-        XCTAssertTrue(
-            app.switches["Сохранять результаты в Фото"].exists ||
-            app.staticTexts["Сохранять результаты в Фото"].exists
-        )
+        // Функция сохранения в Фото не реализована — переключатель удалён,
+        // чтобы не вводить пользователя в заблуждение (Guideline 2.1).
+        XCTAssertFalse(app.switches["Сохранять результаты в Фото"].exists)
     }
 
     func testSC031_settingsShowsDataSourceSection() {

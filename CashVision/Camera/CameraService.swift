@@ -22,6 +22,7 @@ final class CameraService: NSObject {
     private let videoQueue = DispatchQueue(label: "ai.cashvision.camera.queue", qos: .userInitiated)
     private var frameOutput: AVCaptureVideoDataOutput?
     private var isConfigured = false
+    @ObservationIgnored private var torchDevice: AVCaptureDevice?
 
     var captureSession: AVCaptureSession { session }
 
@@ -56,7 +57,7 @@ final class CameraService: NSObject {
     }
 
     func configure() async {
-        guard status == .ready || status == .running else { return }
+        guard !isConfigured, status == .ready || status == .running else { return }
         let session = UncheckedSendable(value: self.session)
         let result: ConfigureResult = await withCheckedContinuation { (continuation: CheckedContinuation<ConfigureResult, Never>) in
             videoQueue.async {
@@ -68,6 +69,7 @@ final class CameraService: NSObject {
         case .success(let output):
             self.frameOutput = output
             self.isConfigured = true
+            self.torchDevice = AVCaptureDevice.default(for: .video)
             AppLogger.camera.info("Camera session configured")
         case .failure(let message):
             self.status = .failed(message)
@@ -108,15 +110,19 @@ final class CameraService: NSObject {
     }
 
     func setTorch(enabled: Bool) async {
-        guard let device = AVCaptureDevice.default(for: .video),
+        guard let device = torchDevice ?? AVCaptureDevice.default(for: .video),
               device.hasTorch else {
             AppLogger.camera.notice("Torch not available on this device")
             return
         }
         do {
             try device.lockForConfiguration()
-            try device.setTorchModeOn(level: enabled ? 1.0 : 0.0)
-            device.unlockForConfiguration()
+            defer { device.unlockForConfiguration() }
+            if enabled {
+                try device.setTorchModeOn(level: 1.0)
+            } else {
+                device.torchMode = .off
+            }
             self.isTorchOn = enabled
             AppLogger.camera.info("Torch \(enabled ? "on" : "off")")
         } catch {
@@ -167,6 +173,9 @@ final class CameraService: NSObject {
     }
 
     func handleAppBackground() {
+        if isTorchOn {
+            Task { await setTorch(enabled: false) }
+        }
         stop()
     }
 

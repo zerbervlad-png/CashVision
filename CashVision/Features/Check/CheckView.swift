@@ -13,7 +13,7 @@ final class CheckViewModel {
     private(set) var selectedFeature: SecurityFeature?
     private(set) var selectedBanknote: RecognizedBanknote?
     @ObservationIgnored private var frameDelegate: CameraFrameDelegate?
-    @ObservationIgnored private var recognitionTask: Task<Void, Never>?
+    @ObservationIgnored private var autoTorchEngaged = false
     var showDemoPicker = false
 
     init(container: AppContainer) {
@@ -82,6 +82,32 @@ final class CheckViewModel {
             status = .banknoteRecognized
             verification = container.makeVerificationService().evaluate(recognized: banknote)
             container.analytics.track(.init(name: .banknoteDetected, properties: ["denom": banknote.denomination.formatted]))
+        }
+        updateAutoTorch(quality: result.quality)
+    }
+
+    private func updateAutoTorch(quality: BanknoteQualityAssessment) {
+        guard container.settings.autoTorchInLowLight else {
+            if autoTorchEngaged {
+                autoTorchEngaged = false
+                Task { await container.cameraService.setTorch(enabled: false) }
+            }
+            return
+        }
+        let lowLight = quality.issues.contains(.lowLight)
+        if lowLight && !autoTorchEngaged {
+            autoTorchEngaged = true
+            Task { await container.cameraService.setTorch(enabled: true) }
+        } else if !lowLight && autoTorchEngaged {
+            autoTorchEngaged = false
+            Task { await container.cameraService.setTorch(enabled: false) }
+        }
+    }
+
+    func deactivate() {
+        if autoTorchEngaged {
+            autoTorchEngaged = false
+            Task { await container.cameraService.setTorch(enabled: false) }
         }
     }
 
@@ -168,8 +194,13 @@ struct CheckView: View {
         }
         .onAppear {
             container.analytics.track(.init(name: .appOpen))
+            if viewModel.permissionState == .ready {
+                viewModel.startRecognitionPipeline()
+                container.cameraService.start()
+            }
         }
         .onDisappear {
+            viewModel.deactivate()
             container.cameraService.stop()
         }
         .sheet(isPresented: $showSheet) {
@@ -389,6 +420,7 @@ struct CheckView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
+                .accessibilityLabel(showStatusPanel ? "Свернуть статус" : "Развернуть статус")
             }
             StatusBadgeView(status: viewModel.verification)
         }

@@ -42,7 +42,6 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         NSCameraUsageDescription: "Камера нужна для распознавания банкнот и проверки защитных признаков. Изображения не покидают устройство."
-        NSPhotoLibraryUsageDescription: "Доступ к фото требуется только при сохранении снимков результатов по вашему запросу."
         ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes: []
         UIRequiredDeviceCapabilities:

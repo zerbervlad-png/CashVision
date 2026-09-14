@@ -108,6 +108,10 @@ struct PremiumView: View {
 
     private var disclaimerSection: some View {
         VStack(spacing: 8) {
+            Text("Оплата списывается с вашего Apple ID при подтверждении покупки. Подписка автоматически продлевается, если не отключить автопродление минимум за 24 часа до конца текущего периода. Управлять подпиской и отключить автопродление можно в настройках Apple ID. Отменить текущий период невозможно.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
             Text(statusDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -204,10 +208,20 @@ struct PlanCard: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
+                    if let offer = product.subscription?.introductoryOffer, offer.paymentMode == .freeTrial {
+                        Text("Первые \(offer.period.value) \(periodUnit(offer.period)) бесплатно, затем — \(product.displayPrice) / \(periodText)")
+                            .font(.caption2)
+                            .foregroundStyle(Color.accentColor)
+                    }
                 }
                 Spacer()
-                Text(product.displayPrice)
-                    .font(.headline)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(product.displayPrice)
+                        .font(.headline)
+                    Text("/ \(periodText)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(16)
             .background(
@@ -225,5 +239,27 @@ struct PlanCard: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    private var periodText: String {
+        guard let subscription = product.subscription else { return "" }
+        let period = subscription.period
+        switch period.unit {
+        case .day: return period.value == 1 ? "день" : "дней"
+        case .week: return period.value == 1 ? "неделю" : "недель"
+        case .month: return period.value == 1 ? "месяц" : "месяцев"
+        case .year: return period.value == 1 ? "год" : "лет"
+        @unknown default: return ""
+        }
+    }
+
+    private func periodUnit(_ period: SubscriptionOffer.Period) -> String {
+        switch period.unit {
+        case .day: return period.value == 1 ? "день" : "дней"
+        case .week: return period.value == 1 ? "неделя" : "недель"
+        case .month: return period.value == 1 ? "месяц" : "месяцев"
+        case .year: return period.value == 1 ? "год" : "лет"
+        @unknown default: return ""
+        }
     }
 }
