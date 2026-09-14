@@ -23,11 +23,20 @@ final class CameraService: NSObject {
     private var frameOutput: AVCaptureVideoDataOutput?
     private var isConfigured = false
     @ObservationIgnored private var torchDevice: AVCaptureDevice?
+    @ObservationIgnored private var lifecycleCancellables: Set<AnyCancellable> = []
 
     var captureSession: AVCaptureSession { session }
 
     override init() {
         super.init()
+        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.handleAppBackground() }
+            .store(in: &lifecycleCancellables)
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.handleAppForeground() }
+            .store(in: &lifecycleCancellables)
     }
 
     func checkPermission() async -> Status {

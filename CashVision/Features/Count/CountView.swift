@@ -10,6 +10,16 @@ struct CountView: View {
     @State private var showCompletionSheet = false
     @State private var showDemoPicker = false
     @State private var cameraFailed = false
+    @State private var countingPipelineDelegate: CameraFrameDelegate?
+
+    private func installCountingPipeline() {
+        let delegate = CameraFrameDelegate(recognition: container.recognitionService) { [weak container] result in
+            guard let result, container?.countingService.isCounting == true else { return }
+            container?.countingService.update(with: result)
+        }
+        countingPipelineDelegate = delegate
+        container.cameraService.setDelegate(delegate)
+    }
 
     var body: some View {
         ZStack {
@@ -68,6 +78,12 @@ struct CountView: View {
             }
             if case .failed = container.cameraService.status {
                 cameraFailed = true
+            }
+        }
+        .onAppear {
+            if started && !cameraFailed {
+                installCountingPipeline()
+                container.cameraService.start()
             }
         }
         .onDisappear {
@@ -156,6 +172,7 @@ struct CountView: View {
             Button {
                 container.countingService.startCounting()
                 if !cameraFailed {
+                    installCountingPipeline()
                     container.cameraService.start()
                 }
                 withAnimation(.cashSpring) {
