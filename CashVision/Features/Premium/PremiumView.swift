@@ -253,7 +253,7 @@ struct PlanCard: View {
         }
     }
 
-    private func periodUnit(_ period: Product.SubscriptionOffer.Period) -> String {
+    private func periodUnit(_ period: Product.SubscriptionPeriod) -> String {
         switch period.unit {
         case .day: return period.value == 1 ? "день" : "дней"
         case .week: return period.value == 1 ? "неделя" : "недель"
