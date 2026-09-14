@@ -242,15 +242,11 @@ struct PlanCard: View {
     }
 
     private var periodText: String {
-        guard let subscription = product.subscription else { return "" }
-        let period = subscription.period
-        switch period.unit {
-        case .day: return period.value == 1 ? "день" : "дней"
-        case .week: return period.value == 1 ? "неделю" : "недель"
-        case .month: return period.value == 1 ? "месяц" : "месяцев"
-        case .year: return period.value == 1 ? "год" : "лет"
-        @unknown default: return ""
-        }
+        if product.id.contains("yearly") { return "год" }
+        if product.id.contains("quarterly") { return "3 месяца" }
+        if product.id.contains("monthly") { return "месяц" }
+        if product.id.contains("weekly") { return "неделя" }
+        return ""
     }
 
     private func periodUnit(_ period: Product.SubscriptionPeriod) -> String {
