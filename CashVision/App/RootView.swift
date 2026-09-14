@@ -28,16 +28,6 @@ struct RootView: View {
             }
         }
         .animation(.cashSpring, value: showOnboarding)
-        .onChange(of: scenePhase) { _, phase in
-            switch phase {
-            case .background:
-                container.cameraService.handleAppBackground()
-            case .active:
-                container.cameraService.handleAppForeground()
-            default:
-                break
-            }
-        }
     }
 }
 

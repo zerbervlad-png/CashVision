@@ -55,7 +55,6 @@ struct DenominationEntry: Codable, Hashable, Identifiable {
 }
 
 @MainActor
-@Observable
 final class HistoryRepository {
     private var entries: [HistoryEntry] = []
 
