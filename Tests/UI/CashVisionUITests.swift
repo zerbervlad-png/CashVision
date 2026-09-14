@@ -191,13 +191,6 @@ final class CashVisionUITests: XCTestCase {
         XCTAssertTrue(countTab.waitForExistence(timeout: 5))
         countTab.tap()
         sleep(3)
-        if !(app.staticTexts["Режим пересчёта"].exists ||
-             app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists ||
-             app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists) {
-            print("=== SC011 DEBUG HIERARCHY ===")
-            print(app.debugDescription)
-            print("=== END SC011 DEBUG ===")
-        }
         XCTAssertTrue(
             app.staticTexts["Режим пересчёта"].exists ||
             app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists ||
