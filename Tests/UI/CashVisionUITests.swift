@@ -191,6 +191,13 @@ final class CashVisionUITests: XCTestCase {
         XCTAssertTrue(countTab.waitForExistence(timeout: 5))
         countTab.tap()
         sleep(3)
+        if !(app.staticTexts["Режим пересчёта"].exists ||
+             app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists ||
+             app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists) {
+            print("=== SC011 DEBUG HIERARCHY ===")
+            print(app.debugDescription)
+            print("=== END SC011 DEBUG ===")
+        }
         XCTAssertTrue(
             app.staticTexts["Режим пересчёта"].exists ||
             app.staticTexts.containing(NSPredicate(format: "label CONTAINS %@", "пересчёт")).firstMatch.exists ||
@@ -414,12 +421,14 @@ final class CashVisionUITests: XCTestCase {
     func testSC022_premiumShowsPrivacyAndTermsLinks() {
         app.tabBars.buttons["Premium"].tap()
         sleep(1)
+        app.swipeUp()
+        sleep(1)
         XCTAssertTrue(
-            app.buttons["Политика конфиденциальности"].exists ||
+            app.buttons["Политика конфиденциальности"].waitForExistence(timeout: 5) ||
             app.staticTexts["Политика конфиденциальности"].exists
         )
         XCTAssertTrue(
-            app.buttons["Условия использования"].exists ||
+            app.buttons["Условия использования"].waitForExistence(timeout: 5) ||
             app.staticTexts["Условия использования"].exists
         )
     }
